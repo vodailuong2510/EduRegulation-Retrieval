@@ -38,8 +38,8 @@ if __name__ == "__main__":
     )
 
     callback = PushToHubCallback(
-        output_dir="./results/saved model",
+        output_dir="./results/saved_model",
         tokenizer=get_tokenizer(model_name)
     )         
 
-    model.fit(x=tf_train_set, validation_data=tf_valid_set, epochs=3, callbacks=[callback], verbose=1)
+    model.fit(x=tf_train_set, validation_data=tf_valid_set, epochs=num_epochs, callbacks=[callback], verbose=1)

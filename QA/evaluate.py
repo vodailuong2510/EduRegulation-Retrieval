@@ -1,32 +1,46 @@
+from sentence_transformers import SentenceTransformer, util
 from transformers import pipeline
-from transformers import TFAutoModelForQuestionAnswering, AutoTokenizer
-import tensorflow as tf
 
-def infer(question, context, model_path:str = "./results/saved model"):
-    tokenizer = AutoTokenizer.from_pretrained(model_path)
-    inputs = tokenizer(question, context, return_tensors="tf")
+def rank_contexts(question, contexts, model, batch_size=32):
+    question_embedding = model.encode(question, convert_to_tensor=True)
+    context_embeddings = model.encode(contexts, convert_to_tensor=True, batch_size=32)
 
-    model = TFAutoModelForQuestionAnswering.from_pretrained(model_path)
-    outputs = model(**inputs)
+    cosine_scores = util.pytorch_cos_sim(question_embedding, context_embeddings)
 
+    ranked_contexts = cosine_scores[0].cpu().numpy()
+    ranked_indices = ranked_contexts.argsort()[::-1] 
 
-    answer_start_index = int(tf.math.argmax(outputs.start_logits, axis=-1)[0])
-    answer_end_index = int(tf.math.argmax(outputs.end_logits, axis=-1)[0])
+    return ranked_indices, ranked_contexts
 
-    predict_answer_tokens = inputs.input_ids[0, answer_start_index : answer_end_index + 1]
+def infer(question, contexts, model_path:str=r"./results/saved_model"):
+    model = SentenceTransformer("all-MiniLM-L6-v2")
 
-    return tokenizer.decode(predict_answer_tokens)
+    # 1. Rank by Document
+    documents = contexts['document'].unique().tolist()  # Get unique documents
+    ranked_document_indices, _ = rank_contexts(question, documents, model)
+
+    best_document_index = ranked_document_indices[0]  # Get best document
+    best_document = documents[best_document_index]
+
+    # 2. Rank by Article within the best document
+    articles_in_best_document = contexts[contexts['document'] == best_document]['article'].unique().tolist()  # Get unique articles in the best document
+    ranked_article_indices, _ = rank_contexts(question, articles_in_best_document, model)
+
+    best_article_index = ranked_article_indices[0]  # Get best article within the best document
+    best_article = articles_in_best_document[best_article_index]
+
+    # 3. Rank by Context within the best article
+    contexts_in_best_article = contexts[(contexts['document'] == best_document) & (contexts['article'] == best_article)]['context'].tolist()
+    ranked_context_indices, _ = rank_contexts(question, contexts_in_best_article, model)
+
+    best_context_index = ranked_context_indices[0]  # Get best context
+    best_context = contexts_in_best_article[best_context_index]
+
+    qa_pipeline = pipeline("question-answering", model = r"./results/saved_model")
+    return qa_pipeline(question=question, context=best_context)
 
 if __name__ == "__main__":
-    model_path = "./results/saved model"
-
-    question = "Theo QUY CHẾ Văn bằng, chứng chỉ của Trường Đại học Công nghệ Thông tin, giấy chứng nhận tốt nghiệp tạm thời được cấp như thế nào?"
-    context = """Điều  14. Thời hạn cấp văn bằng, chứng chỉ
-            1. Hiệu trưởng Trường ĐHCNTT có trách nhiệm cấp văn bằng cho người học trong thời hạn:
-            a) 30 ngày kể từ ngày có quyết định công nhận tốt nghiệp đại học.
-            b) 30 ngày kể từ ngày có quyết định công nhận tốt nghiệp và cấp bằng thạc sĩ.
-            c) 30 ngày kể từ ngày có quyết định công nhận học vị tiến sĩ và cấp bằng tiến sĩ.
-            2. Hiệu trưởng hoặc thủ trưởng đơn vị trực thuộc được ủy quyền có trách nhiệm cấp chứng chỉ cho người học chậm nhất là 30 ngày kể từ ngày kết thúc khóa đào tạo, bồi dưỡng nâng cao trình độ học vấn, nghề nghiệp.
-            3. Trong thời gian chờ cấp văn bằng, người học đã tốt nghiệp được Hiệu trưởng Trường ĐHCNTT cấp giấy chứng nhận tốt nghiệp tạm thời (theo mẫu Phụ lục 7, 8 kèm theo Quy chế này)."
-            """
-    print(infer(question=question, context=context, model_path=model_path))
+    import pandas as pd
+    contexts = pd.read_csv(r"..\EducationRegulation-QA\app\context.csv")
+    question = "Đơn vị nào chịu trách nhiệm phân công chấm bài thi?"
+    print(infer(question, contexts, model_path=r"./results/saved_model"))
