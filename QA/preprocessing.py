@@ -1,7 +1,9 @@
 from transformers import AutoTokenizer
 
+def get_tokenizer(model_name:str = "vinai/phobert-base"):
+    return AutoTokenizer.from_pretrained(model_name)
 def preprocessing(examples, model_name:str = "vinai/phobert-base"):
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    tokenizer = get_tokenizer(model_name)
 
     questions = [q.strip() for q in examples["question"]]
     inputs = tokenizer(

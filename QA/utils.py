@@ -13,7 +13,6 @@ def find_answer_index(row):
 
     return {"text": [answer_text], "answer_start": [start_idx]}
 
-# Hàm load dataset từ thư mục
 def load_dataset(path: str):
     path = Path(path)
     datasets = {}
