@@ -1,8 +1,8 @@
 from QA.utils import load_dataset
-from QA.preprocessing import preprocessing
+from QA.preprocessing import preprocessing, get_tokenizer
 from QA.models import bert_model
 from transformers import DefaultDataCollator
-from tf_keras.callbacks import ModelCheckpoint
+from transformers.keras_callbacks import PushToHubCallback
 
 if __name__ == "__main__":
     dataset = load_dataset("./data")
@@ -20,8 +20,8 @@ if __name__ == "__main__":
 
     total_train_steps = (len(tokenized_dataset["train"]) // batch_size)
 
-    model = bert_model(batch_size=batch_size, learning_rate=learning_rate, 
-                       num_warmup_steps=0, num_train_steps=total_train_steps, model_name_or_path=model_name)
+    model = bert_model(learning_rate=learning_rate, num_warmup_steps=0, 
+                       num_train_steps=total_train_steps, model_name_or_path=model_name)
     
     tf_train_set = model.prepare_tf_dataset(
         tokenized_dataset["train"],
@@ -37,12 +37,9 @@ if __name__ == "__main__":
         collate_fn=data_collator,
     )
 
-    checkpoint_callback = ModelCheckpoint(
-        filepath="./results/best_model.keras",  
-        monitor='val_loss',
-        save_best_only=True,  
-        save_freq='epoch',                               
-        verbose=1                                  
-    )           
+    callback = PushToHubCallback(
+        output_dir="./results/saved model",
+        tokenizer=get_tokenizer(model_name)
+    )         
 
-    model.fit(x=tf_train_set, validation_data=tf_valid_set, epochs=3, callbacks=[checkpoint_callback], verbose=1)
+    model.fit(x=tf_train_set, validation_data=tf_valid_set, epochs=3, callbacks=[callback], verbose=1)
