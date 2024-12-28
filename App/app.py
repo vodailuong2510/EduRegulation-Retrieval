@@ -20,29 +20,36 @@ def rank_contexts(question, contexts, model, batch_size=32):
 
     return ranked_indices, ranked_contexts
 
-def infer(question, contexts, model_path:str= r"./results/saved_model"):
-    model = SentenceTransformer("all-MiniLM-L6-v2")
+def infer(question, contexts, model_path:str=r"./results/saved_model"):
+    model = SentenceTransformer("paraphrase-multilingual-MiniLM-L12-v2")
 
     # 1. Rank by Document
     documents = contexts['document'].unique().tolist()  # Get unique documents
     ranked_document_indices, _ = rank_contexts(question, documents, model)
 
-    best_document_index = ranked_document_indices[0]  # Get best document
-    best_document = documents[best_document_index]
+    # Get top 5 documents
+    top_3_documents = [documents[i] for i in ranked_document_indices[:3]]
 
     # 2. Rank by Article within the best document
-    articles_in_best_document = contexts[contexts['document'] == best_document]['article'].unique().tolist()  # Get unique articles in the best document
-    ranked_article_indices, _ = rank_contexts(question, articles_in_best_document, model)
+    top_3_articles = []
+    for doc in top_3_documents:
+        articles_in_best_document = contexts[contexts['document'] == doc]['article'].unique().tolist()
+        ranked_article_indices, _ = rank_contexts(question, articles_in_best_document, model)
 
-    best_article_index = ranked_article_indices[0]  # Get best article within the best document
-    best_article = articles_in_best_document[best_article_index]
+        # Get top 5 articles for each document
+        top_3_articles.append([articles_in_best_document[i] for i in ranked_article_indices[:3]])
 
     # 3. Rank by Context within the best article
-    contexts_in_best_article = contexts[(contexts['document'] == best_document) & (contexts['article'] == best_article)]['context'].tolist()
-    ranked_context_indices, _ = rank_contexts(question, contexts_in_best_article, model)
+    top_contexts = []
+    for doc, articles in zip(top_3_documents, top_3_articles):
+        for article in articles:
+            top_contexts.extend(contexts[(contexts['document'] == doc) & (contexts['article'] == article)]['context'].tolist())
 
-    best_context_index = ranked_context_indices[0]  # Get best context
-    best_context = contexts_in_best_article[best_context_index]
+    ranked_context_indices, _ = rank_contexts(question, top_contexts, model)
+
+    best_context_index = ranked_context_indices[0]
+    best_context = top_contexts[best_context_index]
+    
 
     qa_pipeline = pipeline("question-answering", model = r"./results/saved_model")
     return qa_pipeline(question=question, context=best_context)

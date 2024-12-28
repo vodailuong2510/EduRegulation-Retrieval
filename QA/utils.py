@@ -4,7 +4,7 @@ from datasets import Dataset, DatasetDict
 
 def find_answer_index(row):
     answer_text = row["extractive answer"]  
-    context = row["context"]  # Đảm bảo tên cột đúng
+    context = row["context"] 
 
     try:
         start_idx = context.index(answer_text) 
