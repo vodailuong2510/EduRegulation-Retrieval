@@ -2,6 +2,15 @@ from rank_bm25 import BM25Okapi
 import pandas as pd
 from transformers import pipeline, AutoTokenizer
 
+from datasets import load_metric
+
+# Load the metric from Hugging Face's `evaluate` library
+metric = load_metric("exact_match")
+
+def compute_em(predictions, references):
+    em_score = metric.compute(predictions=predictions, references=references)["exact_match"]
+    return em_score
+
 def rank_contexts(question, contexts, tokenizer, batch_size=32):
     # Tokenize context và question bằng tokenizer của PHOBERT
     tokenized_contexts = [tokenizer.tokenize(context.lower()) for context in contexts]

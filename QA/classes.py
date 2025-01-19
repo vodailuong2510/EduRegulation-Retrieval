@@ -1,0 +1,31 @@
+import numpy as np
+from QA.evaluate import compute_em
+
+class ExactMatchCallback(tf.keras.callbacks.Callback):
+    def __init__(self, valid_dataset, tokenizer):
+        self.valid_dataset = valid_dataset
+        self.tokenizer = tokenizer
+
+    def on_epoch_end(self, epoch, logs=None):
+        all_predictions = []
+        all_references = []
+
+        for batch in self.valid_dataset:
+            inputs = batch["input_ids"]
+            attention_mask = batch["attention_mask"]
+            start_logits, end_logits = self.model.predict([inputs, attention_mask])
+
+            for i in range(len(inputs)):
+                start_idx = np.argmax(start_logits[i])
+                end_idx = np.argmax(end_logits[i])
+                
+                pred_ids = inputs[i][start_idx:end_idx + 1]
+                pred_answer = self.tokenizer.decode(pred_ids, skip_special_tokens=True)
+
+                reference_answer = batch["answers"]["text"][0]
+
+                all_predictions.append(pred_answer)
+                all_references.append(reference_answer)
+
+        em_score = compute_em(all_predictions, all_references)
+        print(f"Exact Match (EM) score: {em_score * 100:.2f}%")
