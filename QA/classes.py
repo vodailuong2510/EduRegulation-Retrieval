@@ -18,9 +18,9 @@ class ExactMatchCallback(Callback):
 
             for i in range(len(inputs)):
                 start_idx = np.argmax(start_logits[i])
-                end_idx = np.argmax(end_logits[i])
-                
-                pred_ids = inputs[i][start_idx:end_idx + 1]
+                end_idx = np.argmax(end_logits[i]) 
+                 
+                pred_ids = inputs[i][start_idx:end_idx + 1] 
                 pred_answer = self.tokenizer.decode(pred_ids, skip_special_tokens=True)
 
                 reference_answer = batch["answers"]["text"][0]
@@ -30,3 +30,11 @@ class ExactMatchCallback(Callback):
 
         em_score = compute_em(all_predictions, all_references)
         print(f"Exact Match (EM) score: {em_score * 100:.2f}%")
+
+    def _implements_train_batch_hooks(self):
+        return False
+    def _implements_test_batch_hooks(self):
+        return False
+    def _implements_predict_batch_hooks(self):
+        return False
+
