@@ -11,7 +11,7 @@ if __name__ == "__main__":
     learning_rate = 2e-5
     num_epochs = 3
     num_warmup_steps = 0
-    model_name = "bert-base-multilingual-cased"
+    model_name = "vinai/phobert-base"
 
     tokenized_dataset = dataset.map(lambda examples: preprocessing(examples, model_name=model_name), batched=True, remove_columns=dataset["train"].column_names)
 
