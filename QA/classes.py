@@ -1,7 +1,8 @@
 import numpy as np
 from QA.evaluate import compute_em
+from tensorflow.keras.callbacks import Callback
 
-class ExactMatchCallback(tf.keras.callbacks.Callback):
+class ExactMatchCallback(Callback):
     def __init__(self, valid_dataset, tokenizer):
         self.valid_dataset = valid_dataset
         self.tokenizer = tokenizer
