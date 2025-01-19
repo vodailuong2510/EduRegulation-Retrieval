@@ -24,7 +24,7 @@ def preprocessing(examples, model_name: str = "vinai/phobert-base"):
     inputs = tokenizer(
         questions,
         examples["context"],
-        max_length=1000,
+        max_length=400,
         truncation="only_second",
         padding="max_length",
     )
