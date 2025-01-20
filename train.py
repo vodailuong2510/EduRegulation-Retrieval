@@ -1,3 +1,6 @@
+import os
+os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
+
 from QA.utils import load_dataset
 from QA.preprocessing import preprocessing, get_tokenizer
 from QA.models import bert_model
@@ -18,9 +21,7 @@ if __name__ == "__main__":
 
     data_collator = DefaultDataCollator(return_tensors="tf")
 
-
     total_train_steps = (len(tokenized_dataset["train"]) // batch_size)
-
     model = bert_model(learning_rate=learning_rate, num_warmup_steps=0, 
                        num_train_steps=total_train_steps, model_name_or_path=model_name)
     

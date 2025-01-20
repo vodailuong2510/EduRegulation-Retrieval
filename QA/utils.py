@@ -23,16 +23,14 @@ def load_dataset(path: str):
 
         df = pd.read_csv(file_path)
         
-        columns = ["index", "context", "article", "document", "question", "extractive answer"]
+        df['title'] = df['document'] + ' ' + df['article']
 
         df["extractive answer"] = df.apply(find_answer_index, axis=1)
+        df = df[df["extractive answer"].apply(lambda x: x["answer_start"][0] != -1)]
 
-        invalid_answers = df[df["extractive answer"].apply(lambda x: x["answer_start"][0] == -1)]
-        if not invalid_answers.empty:
-            print(f"Warning: Some answers in {file_path.name} were not found in the context!")
-            print(invalid_answers[["index", "context", "question", "extractive answer"]])
-
-        dataset_type = file_path.stem  
+        columns = ["index", "title", "context", "question", "extractive answer"]
+        dataset_type = file_path.stem 
+        df = df.reset_index(drop=True) 
         datasets[dataset_type] = Dataset.from_pandas(df[columns])
 
     return DatasetDict(datasets)
