@@ -24,19 +24,36 @@ if __name__ == "__main__":
     model = bert_model(learning_rate=learning_rate, num_warmup_steps=0, 
                        num_train_steps=total_train_steps, model_name_or_path=model_name)
     
+    small_train_dataset = tokenized_dataset["train"].select(range(100)) 
+    small_val_dataset = tokenized_dataset["val"].select(range(20)) 
+
     tf_train_set = model.prepare_tf_dataset(
-        tokenized_dataset["train"],
+        small_train_dataset,
         shuffle=True,
         batch_size=batch_size,
         collate_fn=data_collator,
     )
 
     tf_valid_set = model.prepare_tf_dataset(
-        tokenized_dataset["val"],
+        small_val_dataset,
         shuffle=False,
         batch_size=batch_size,
         collate_fn=data_collator,
-    )      
+    )   
+    
+    # tf_train_set = model.prepare_tf_dataset(
+    #     tokenized_dataset["train"],
+    #     shuffle=True,
+    #     batch_size=batch_size,
+    #     collate_fn=data_collator,
+    # )
+
+    # tf_valid_set = model.prepare_tf_dataset(
+    #     tokenized_dataset["val"],
+    #     shuffle=False,
+    #     batch_size=batch_size,
+    #     collate_fn=data_collator,
+    # )      
 
     callback = PushToHubCallback(
         output_dir="./results/saved_model",
