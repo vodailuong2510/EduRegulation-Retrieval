@@ -18,6 +18,7 @@ def train_bert_model(learning_rate:float= 2e-5, weight_decay:float= 0.01,
         num_train_epochs=num_train_epochs,
         weight_decay=weight_decay,
         push_to_hub=True,
+        logging_steps=200,
         report_to = "none",
     )
 
