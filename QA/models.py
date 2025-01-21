@@ -17,7 +17,7 @@ def train_bert_model(learning_rate:float= 2e-5, weight_decay:float= 0.01,
         per_device_eval_batch_size=batch_size,
         num_train_epochs=num_train_epochs,
         weight_decay=weight_decay,
-        push_to_hub=False,
+        push_to_hub=True,
         report_to = "none",
     )
 
@@ -31,4 +31,6 @@ def train_bert_model(learning_rate:float= 2e-5, weight_decay:float= 0.01,
     )
 
     trainer.train()
+
+    trainer.push_to_hub()
 
