@@ -13,7 +13,7 @@ def train_bert_model(learning_rate:float= 2e-5, weight_decay:float= 0.01,
     model = AutoModelForQuestionAnswering.from_pretrained(model_name_or_path)
     
     training_args = TrainingArguments(
-        output_dir="",
+        output_dir=save_path,
         eval_strategy="epoch",
         learning_rate=learning_rate,
         per_device_train_batch_size=batch_size,
