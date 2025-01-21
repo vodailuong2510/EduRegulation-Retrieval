@@ -1,5 +1,6 @@
 import os
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
+os.environ['TF_XLA_FLAGS'] = '--tf_xla_enable_xla_devices=false'
 
 from QA.utils import load_dataset
 from QA.preprocessing import preprocessing, get_tokenizer
@@ -15,7 +16,7 @@ if __name__ == "__main__":
     learning_rate = 2e-5
     num_epochs = 3
     num_warmup_steps = 0
-    model_name = "vinai/phobert-base"
+    model_name = "xlm-roberta-base"
 
     tokenized_dataset = dataset.map(lambda examples: preprocessing(examples, model_name=model_name), batched=True, remove_columns=dataset["train"].column_names)
 
