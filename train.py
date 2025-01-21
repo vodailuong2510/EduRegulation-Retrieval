@@ -15,10 +15,7 @@ if __name__ == "__main__":
     save_path = "./results/saved_model"
 
     tokenized_dataset = dataset.map(lambda examples: preprocessing(examples, model_name=model_name), batched=True, remove_columns=dataset["train"].column_names)
-    
-    small_train_dataset = tokenized_dataset["train"].select(range(100)) 
-    small_eval_dataset = tokenized_dataset["val"].select(range(20)) 
 
     train_bert_model(learning_rate=learning_rate, weight_decay=weight_decay, 
                      batch_size=batch_size, num_train_epochs=num_epochs, model_name_or_path=model_name, 
-                     data_collator=data_collator, eval_dataset=small_eval_dataset, train_dataset=small_train_dataset, save_path=save_path)
+                     data_collator=data_collator, eval_dataset=tokenized_dataset['val'], train_dataset=tokenized_dataset['train'], save_path=save_path)
