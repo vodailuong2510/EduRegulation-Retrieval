@@ -1,7 +1,7 @@
-from rank_bm25 import BM25Okapi
-import pandas as pd
-from transformers import pipeline, AutoTokenizer
 import evaluate
+import pandas as pd
+from rank_bm25 import BM25Okapi
+from transformers import pipeline, AutoTokenizer
 
 def compute_em(predictions, references):
     metric = evaluate.load("exact_match")
