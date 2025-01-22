@@ -1,4 +1,3 @@
-import os
 from QA.utils import load_dataset
 from QA.preprocessing import preprocessing
 from QA.models import train_bert_model
@@ -11,7 +10,8 @@ if __name__ == "__main__":
     weight_decay= 0.01
     batch_size = 16
     num_epochs = 3
-    model_name_or_path = "./results/saved_model" if os.path.exists("./results/saved_model") else "xlm-roberta-base" 
+    model_name_or_path = "vodailuong2510/saved_model" if os.path.exists("./results/saved_model") else "xlm-roberta-base" 
+    print(model_name_or_path)
     data_collator = DefaultDataCollator()
     save_path = "./results/saved_model"
 

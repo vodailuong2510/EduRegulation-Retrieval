@@ -3,9 +3,31 @@ import pandas as pd
 from rank_bm25 import BM25Okapi
 from transformers import pipeline, AutoTokenizer
 
+def infer(question, context, model_name_or_path= "vodailuong2510/saved_model"):
+    qa_pipeline = pipeline("question-answering", model=model_name_or_path, tokenizer=model_name_or_path)
+    result = qa_pipeline(question=question, context=context)
+
+    return result
+
 def compute_em(predictions, references):
     metric = evaluate.load("exact_match")
     em_score = metric.compute(predictions=predictions, references=references)["exact_match"]
+    return em_score
+
+def evaluate_model(test_dataset, model_name_or_path= "vodailuong2510/saved_model"):
+    predictions = []
+    references = []
+
+    for sample in test_dataset:
+        context = sample["context"]
+        question = sample["question"]
+        answer = sample["extractive answer"]["text"][0]
+
+        result = infer(question=question, context=context, model_name_or_path=model_name_or_path)
+        predictions.append(result["answer"])
+        references.append(answer)
+
+    em_score = compute_em(predictions, references)
     return em_score
 
 def rank_contexts(question, contexts, tokenizer, batch_size=32):
@@ -19,7 +41,7 @@ def rank_contexts(question, contexts, tokenizer, batch_size=32):
 
     return ranked_indices, scores
 
-def infer(question, contexts, model_path="./results/saved_model"):
+def reply(question, contexts, model_path="vodailuong2510/saved_model"):
     tokenizer = AutoTokenizer.from_pretrained(model_path)
 
     documents = contexts['document'].unique().tolist()  
@@ -47,8 +69,7 @@ def infer(question, contexts, model_path="./results/saved_model"):
     print("Top Documents:", top_documents)
     print("Top Articles:", top_articles)
 
-    qa_pipeline = pipeline("question-answering", model=model_path, tokenizer=model_path)
-    result = qa_pipeline(question=question, context=best_context)
+    result = infer(question=question, context=best_context, model_name_or_path=model_path)
 
     return result
 
@@ -56,5 +77,5 @@ if __name__ == "__main__":
     contexts = pd.read_csv(r"../EducationRegulation-QA/app/context.csv")
     question = "Sau khi giáo trình được in, đơn vị nào phân phối giáo trình?"
 
-    answer = infer(question, contexts, model_path="./results/saved_model")
+    answer = reply(question, contexts, model_path="./results/saved_model")
     print("Answer:", answer)
