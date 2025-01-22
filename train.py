@@ -1,3 +1,4 @@
+import os
 from QA.utils import load_dataset
 from QA.preprocessing import preprocessing
 from QA.models import train_bert_model
