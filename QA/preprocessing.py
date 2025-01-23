@@ -20,7 +20,7 @@ def preprocessing(examples, model_name: str = "vinai/phobert-base"):
 
     offset_mapping = inputs.pop("offset_mapping")
     sample_map = inputs.pop("overflow_to_sample_mapping")
-    answers = examples["answers"]
+    answers = examples["extractive answer"]
     start_positions = []
     end_positions = []
 
