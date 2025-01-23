@@ -18,13 +18,15 @@ def preprocessing(examples, model_name: str = "vinai/phobert-base"):
         return_overflowing_tokens=True
     )
 
-    offset_mappings = inputs.pop("offset_mapping")
-    answers = examples["extractive answer"]
+    offset_mapping = inputs.pop("offset_mapping")
+    sample_map = inputs.pop("overflow_to_sample_mapping")
+    answers = examples["answers"]
     start_positions = []
     end_positions = []
 
-    for i, offset in enumerate(offset_mappings):
-        answer = answers[i]
+    for i, offset in enumerate(offset_mapping):
+        sample_idx = sample_map[i]
+        answer = answers[sample_idx]
         start_char = answer["answer_start"][0]
         end_char = answer["answer_start"][0] + len(answer["text"][0])
         sequence_ids = inputs.sequence_ids(i)
@@ -37,7 +39,7 @@ def preprocessing(examples, model_name: str = "vinai/phobert-base"):
             idx += 1
         context_end = idx - 1
 
-        if offset[context_start][0] > end_char or offset[context_end][1] < start_char:
+        if offset[context_start][0] > start_char or offset[context_end][1] < end_char:
             start_positions.append(0)
             end_positions.append(0)
         else:
