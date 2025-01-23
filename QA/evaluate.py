@@ -10,8 +10,8 @@ def infer(question, context, model_name_or_path= "vodailuong2510/saved_model"):
     return result
 
 def compute_em(predictions, references):
-    metric = evaluate.load("exact_match")
-    em_score = metric.compute(predictions=predictions, references=references)["exact_match"]
+    metric = evaluate.load("squad")
+    em_score = metric.compute(predictions=predictions, references=references)
     return em_score
 
 def evaluate_model(test_dataset, model_name_or_path= "vodailuong2510/saved_model"):
@@ -24,8 +24,19 @@ def evaluate_model(test_dataset, model_name_or_path= "vodailuong2510/saved_model
         answer = sample["extractive answer"]["text"][0]
 
         result = infer(question=question, context=context, model_name_or_path=model_name_or_path)
-        predictions.append(result["answer"])
-        references.append(answer)
+
+        predictions.append({
+            "id": str(sample["index"]),
+            "prediction_text": result["answer"].strip()
+        })
+
+        references.append({
+            "id": str(sample["index"]), 
+            "answers": [{
+                "text": answer.strip(),
+                "answer_start": sample["extractive answer"]["answer_start"][0]
+            }]
+        })
 
     em_score = compute_em(predictions, references)
     return em_score
