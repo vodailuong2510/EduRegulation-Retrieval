@@ -8,7 +8,8 @@ if __name__ == "__main__":
     dataset = load_dataset("./data")
 
     model_path = "vodailuong2510/saved_model"
-    val_dataset = dataset["val"].select(range(10))
+    
+    val_dataset = dataset["val"]
     test_dataset = dataset["test"]
 
     print("Exact Match and F1S core on Validation Set:", evaluate_model(val_dataset, model_name_or_path= model_path))
