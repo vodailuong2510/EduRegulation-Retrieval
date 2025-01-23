@@ -228,8 +228,7 @@ def ask():
     contexts = pd.read_csv(r"../EducationRegulation-QA/app/contexts.csv")
     answer = reply(question, contexts, model_path="vodailuong2510/saved_model")
 
-    # Return the answer as JSON to update the UI
-    return jsonify({"answer": answer})
+    return jsonify({"answer": answer['answer']})
 
 if __name__ == "__main__":
     app.run(debug=True)
