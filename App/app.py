@@ -1,13 +1,19 @@
 from flask import Flask, request, jsonify, render_template_string
-from sentence_transformers import SentenceTransformer, util
-from transformers import pipeline
+from transformers import pipeline, AutoTokenizer
 import pandas as pd
+from rank_bm25 import BM25Okapi
 
 # Initialize Flask app
 app = Flask(__name__)
 
-# Define the model path
 model_path = "vodailuong2510/saved_model"
+
+def infer(question, context, model_name_or_path= "vodailuong2510/saved_model"):
+    qa_pipeline = pipeline("question-answering", model=model_name_or_path, tokenizer=model_name_or_path)
+    result = qa_pipeline(question=question, context=context)
+
+    return result
+
 
 def rank_contexts(question, contexts, tokenizer, batch_size=32):
 
