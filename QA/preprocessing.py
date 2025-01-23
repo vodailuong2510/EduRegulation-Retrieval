@@ -3,20 +3,6 @@ from transformers import AutoTokenizer
 def get_tokenizer(model_name: str = "vinai/phobert-base"):
     return AutoTokenizer.from_pretrained(model_name)
 
-def create_offset_mapping(text, tokenizer):
-    tokens = tokenizer.tokenize(text)
-    offset_mapping = []
-    current_position = 0
-
-    for token in tokens:
-        token = token.replace("▁", "") 
-        start_index = text.find(token, current_position)
-        end_index = start_index + len(token)
-        offset_mapping.append((start_index, end_index))
-        current_position = end_index
-
-    return offset_mapping
-
 def preprocessing(examples, model_name: str = "vinai/phobert-base"):
     tokenizer = get_tokenizer(model_name)
 
@@ -29,12 +15,8 @@ def preprocessing(examples, model_name: str = "vinai/phobert-base"):
         truncation="only_second",
         padding="max_length",
         return_offsets_mapping=True,
+        return_overflowing_tokens=True
     )
-
-    # offset_mappings = []
-    # for context in examples["context"]:
-    #     offset_mapping = create_offset_mapping(context, tokenizer)
-    #     offset_mappings.append(offset_mapping)
 
     offset_mappings = inputs.pop("offset_mapping")
     answers = examples["extractive answer"]
