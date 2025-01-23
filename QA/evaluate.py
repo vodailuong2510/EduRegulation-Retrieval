@@ -55,38 +55,24 @@ def rank_contexts(question, contexts, tokenizer, batch_size=32):
 def reply(question, contexts, model_path="vodailuong2510/saved_model"):
     tokenizer = AutoTokenizer.from_pretrained(model_path)
 
-    documents = contexts['document'].unique().tolist()  
-    ranked_document_indices, _ = rank_contexts(question, documents, tokenizer)
-
-    top_documents = [documents[i] for i in ranked_document_indices[:3]]
-
-    top_articles = []
-    for doc in top_documents:
-        articles_in_document = contexts[contexts['document'] == doc]['article'].unique().tolist()
-        ranked_article_indices, _ = rank_contexts(question, articles_in_document, tokenizer)
-        top_articles.append([articles_in_document[i] for i in ranked_article_indices[:3]])
-
-    candidate_contexts = []
-    for doc, articles in zip(top_documents, top_articles):
-        for article in articles:
-            candidate_contexts.extend(contexts[(contexts['document'] == doc) & 
-                                               (contexts['article'] == article)]['context'].tolist())
+    candidate_contexts = contexts['context'].tolist()
 
     ranked_context_indices, _ = rank_contexts(question, candidate_contexts, tokenizer)
 
     best_context_index = ranked_context_indices[0]
     best_context = candidate_contexts[best_context_index]
 
-    print("Top Documents:", top_documents)
-    print("Top Articles:", top_articles)
+
+    best_context_index = ranked_context_indices[0]
+    best_context = candidate_contexts[best_context_index]
 
     result = infer(question=question, context=best_context, model_name_or_path=model_path)
 
     return result
 
 if __name__ == "__main__":
-    contexts = pd.read_csv(r"../EducationRegulation-QA/app/context.csv")
-    question = "Sau khi giáo trình được in, đơn vị nào phân phối giáo trình?"
+    contexts = pd.read_csv(r"../EducationRegulation-QA/app/contexts.csv")
+    question = "Sinh viên chưa hết thời gian tối đa hoàn thành khóa học quy định tại Điều 6 của Quy chế này, đã hoàn thành các học phần trong chương trình đào tạo có nguyện vọng xin thôi học theo diện này thì phải làm gì?"
 
-    answer = reply(question, contexts, model_path="./results/saved_model")
+    answer = reply(question, contexts, model_path="vodailuong2510/saved_model")
     print("Answer:", answer)
