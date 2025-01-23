@@ -38,17 +38,18 @@ def load_dataset(path: str):
 if __name__ == "__main__":
     try:
         dataset = load_dataset(r"..\EducationRegulation-QA\data")  
-        
+        print(dataset)
         all_combined_contexts = []
         for dataset_name, data in dataset.items():
             for record in data:
-                all_combined_contexts.append([record["document"], record["article"], record["context"]])
+                all_combined_contexts.append([record["title"], record["context"]])
 
+        combined_df = pd.DataFrame(all_combined_contexts, columns=["title", "context"])
 
-        combined_df = pd.DataFrame(all_combined_contexts, columns=["document", "article", "context"])
+        combined_df.drop_duplicates(inplace=True)
 
-        combined_df.to_csv(r"..\EducationRegulation-QA\app\context.csv", index=False)
+        combined_df.to_csv(r"..\EducationRegulation-QA\app\contexts.csv", index=False)
 
-        print("Context saved to '/app/context.csv'")
+        print("Context saved to '/app/contexts.csv'")
     except Exception as e:
         print(f"Error: {e}")
