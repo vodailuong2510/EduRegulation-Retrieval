@@ -6,7 +6,7 @@ from transformers import DefaultDataCollator
 
 if __name__ == "__main__":
     dataset = load_dataset("./data")
-
+    print(dataset)
     learning_rate = 2e-5
     weight_decay= 0.01
     batch_size = 16

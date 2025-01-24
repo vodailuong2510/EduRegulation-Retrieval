@@ -37,7 +37,7 @@ def load_dataset(path: str):
 
 if __name__ == "__main__":
     try:
-        dataset = load_dataset(r"..\EducationRegulation-QA\data")  
+        dataset = load_dataset(r"..\EduRegulation-Retrieval\data")  
         print(dataset)
         all_combined_contexts = []
         for dataset_name, data in dataset.items():
@@ -48,7 +48,7 @@ if __name__ == "__main__":
 
         combined_df.drop_duplicates(inplace=True)
 
-        combined_df.to_csv(r"..\EducationRegulation-QA\app\contexts.csv", index=False)
+        combined_df.to_csv(r"..\EduRegulation-Retrieval\app\contexts.csv", index=False)
 
         print("Context saved to '/app/contexts.csv'")
     except Exception as e:
