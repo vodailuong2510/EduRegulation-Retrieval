@@ -71,7 +71,7 @@ def reply(question, contexts, model_path="vodailuong2510/saved_model"):
     return result
 
 if __name__ == "__main__":
-    contexts = pd.read_csv(r"../EducationRegulation-QA/app/contexts.csv")
+    contexts = pd.read_csv(r"../EduRegulation-Retrieval/app/contexts.csv")
     question = "Sinh viên chưa hết thời gian tối đa hoàn thành khóa học quy định tại Điều 6 của Quy chế này, đã hoàn thành các học phần trong chương trình đào tạo có nguyện vọng xin thôi học theo diện này thì phải làm gì?"
 
     answer = reply(question, contexts, model_path="vodailuong2510/saved_model")

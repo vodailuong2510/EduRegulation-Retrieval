@@ -225,7 +225,7 @@ def home():
 def ask():
     question = request.form["question"]
     
-    contexts = pd.read_csv(r"../EducationRegulation-QA/app/contexts.csv")
+    contexts = pd.read_csv(r"../EduRegulation-Retrieval/app/contexts.csv")
     answer = reply(question, contexts, model_path="vodailuong2510/saved_model")
 
     return jsonify({"answer": answer['answer']})
