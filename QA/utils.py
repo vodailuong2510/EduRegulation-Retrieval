@@ -1,19 +1,42 @@
+import re
+import os
 import pandas as pd
 from pathlib import Path
 from datasets import Dataset, DatasetDict
 
-def find_answer_index(row):
-    answer_text = row["extractive answer"]  
-    context = row["context"] 
+def find_answer_index(row) -> dict:
+    answer_texts = re.split(r'[#\n]+', row["extractive answer"])
+    context = row["context"]
 
-    try:
-        start_idx = context.index(answer_text) 
-    except ValueError:
-        start_idx = -1  
+    answer_list = []
+    start_indices = []
 
-    return {"text": [answer_text], "answer_start": [start_idx]}
+    for answer_text in answer_texts:
+        try:
+            start_idx = context.index(answer_text.strip())
+        except ValueError:
+            start_idx = -1
 
-def load_dataset(path: str):
+        answer_list.append(answer_text.strip())  
+        start_indices.append(start_idx)
+
+    return {"text": answer_list, "answer_start": start_indices}
+
+def clean_dataset(path:str):
+    path = Path(path)
+
+    for file_path in path.iterdir():
+        if file_path.suffix != '.csv': 
+            continue
+
+        df = pd.read_csv(file_path)
+
+        df = df.map(lambda cell: "\n".join([" ".join(line.split()) for line in cell.split("\n")]) if isinstance(cell, str) else cell)
+
+        df.to_csv(os.path.join(path, f'{file_path.stem}.csv'), index=False)
+
+
+def load_dataset(path:str) -> DatasetDict:
     path = Path(path)
     datasets = {}
 
@@ -27,7 +50,7 @@ def load_dataset(path: str):
 
         df["extractive answer"] = df.apply(find_answer_index, axis=1)
         df = df[df["extractive answer"].apply(lambda x: x["answer_start"][0] != -1)]
-
+        
         columns = ["index", "title", "context", "question", "extractive answer"]
         dataset_type = file_path.stem 
         df = df.reset_index(drop=True) 
@@ -35,21 +58,30 @@ def load_dataset(path: str):
 
     return DatasetDict(datasets)
 
+def load_contexts(path:str) -> DatasetDict:
+    path = Path(path)
+    datasets = {}
+
+    for file_path in path.iterdir():
+        if file_path.suffix != '.csv': 
+            continue
+
+        df = pd.read_csv(file_path)
+        
+        df['contexts'] = df['document'] + '\n' + df['context']
+        
+
+        dataset_type = file_path.stem 
+        df = df.reset_index(drop=True) 
+        datasets[dataset_type] = Dataset.from_pandas(df[['contexts']])
+
+    return DatasetDict(datasets)
+    
 if __name__ == "__main__":
     try:
-        dataset = load_dataset(r"..\EduRegulation-Retrieval\data")  
+        path = r"..\data\finetune"
+        clean_dataset(path)
+        dataset = load_contexts(path)  
         print(dataset)
-        all_combined_contexts = []
-        for dataset_name, data in dataset.items():
-            for record in data:
-                all_combined_contexts.append([record["title"], record["context"]])
-
-        combined_df = pd.DataFrame(all_combined_contexts, columns=["title", "context"])
-
-        combined_df.drop_duplicates(inplace=True)
-
-        combined_df.to_csv(r"..\EduRegulation-Retrieval\app\contexts.csv", index=False)
-
-        print("Context saved to '/app/contexts.csv'")
     except Exception as e:
         print(f"Error: {e}")

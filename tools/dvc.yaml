@@ -1,0 +1,22 @@
+dvc init
+dvc add data/train.json
+git add data/train.json.dvc .gitignore
+git commit -m "Add training data with DVC"
+
+# DVC pipeline
+dvc stage add -n preprocess \
+  -d src/data_preprocessing.py -d data/train.json \
+  -o data/processed.json \
+  python src/data_preprocessing.py
+
+dvc stage add -n train \
+  -d src/train.py -d data/processed.json -p learning_rate,batch_size \
+  -o models/bert_model.pt \
+  python src/train.py
+
+dvc stage add -n evaluate \
+  -d src/evaluate.py -d models/bert_model.pt -d data/test.json \
+  -M metrics.json \
+  python src/evaluate.py
+
+dvc repro
