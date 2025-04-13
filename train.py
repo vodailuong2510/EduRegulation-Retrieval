@@ -21,3 +21,28 @@ if __name__ == "__main__":
     train_bert_model(learning_rate=learning_rate, weight_decay=weight_decay, 
                      batch_size=batch_size, num_train_epochs=num_epochs, model_name_or_path=model_name_or_path, 
                      data_collator=data_collator, eval_dataset=tokenized_dataset['val'], train_dataset=tokenized_dataset['train'], save_path=save_path)
+    
+
+import mlflow
+import mlflow.pytorch
+
+with mlflow.start_run():
+    mlflow.log_params({
+        "learning_rate": args.learning_rate,
+        "batch_size": args.batch_size,
+        ...
+    })
+
+    model = train_model(...)
+    mlflow.pytorch.log_model(model, "model")
+
+    # log metrics
+    mlflow.log_metric("f1", f1)
+    mlflow.log_artifact("models/bert_model.pt")
+
+clearml-init  # kết nối với server của bạn
+
+# Trong train.py
+from clearml import Task
+task = Task.init(project_name="BERT QA", task_name="Fine-tune BERT", task_type=Task.TaskTypes.training)
+
