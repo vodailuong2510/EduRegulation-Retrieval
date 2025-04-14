@@ -1,12 +1,4 @@
 import evaluate
-import pandas as pd
-from transformers import pipeline, AutoTokenizer
-
-def infer(question, context, model_name_or_path= "vodailuong2510/saved_model"):
-    qa_pipeline = pipeline("question-answering", model=model_name_or_path, tokenizer=model_name_or_path)
-    result = qa_pipeline(question=question, context=context)
-
-    return result
 
 def compute_em(predictions, references):
     metric = evaluate.load("squad")
@@ -39,28 +31,3 @@ def evaluate_model(test_dataset, model_name_or_path= "vodailuong2510/saved_model
 
     em_score = compute_em(predictions, references)
     return em_score
-
-def reply(question, contexts, model_path="vodailuong2510/saved_model"):
-    tokenizer = AutoTokenizer.from_pretrained(model_path)
-
-    candidate_contexts = contexts['context'].tolist()
-
-    ranked_context_indices, _ = rank_contexts(question, candidate_contexts, tokenizer)
-
-    best_context_index = ranked_context_indices[0]
-    best_context = candidate_contexts[best_context_index]
-
-
-    best_context_index = ranked_context_indices[0]
-    best_context = candidate_contexts[best_context_index]
-
-    result = infer(question=question, context=best_context, model_name_or_path=model_path)
-
-    return result
-
-if __name__ == "__main__":
-    contexts = pd.read_csv(r"../EduRegulation-Retrieval/app/contexts.csv")
-    question = "Sinh viên chưa hết thời gian tối đa hoàn thành khóa học quy định tại Điều 6 của Quy chế này, đã hoàn thành các học phần trong chương trình đào tạo có nguyện vọng xin thôi học theo diện này thì phải làm gì?"
-
-    answer = reply(question, contexts, model_path="vodailuong2510/saved_model")
-    print("Answer:", answer)
