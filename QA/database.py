@@ -1,4 +1,6 @@
 from pymongo import MongoClient
+from clearml import Task
+task = Task.init(project_name='EduRegulation-Retrieval', task_name='Data Preparation')
 
 def get_mongo_collection(Mongo_Key):
     client = MongoClient(Mongo_Key)

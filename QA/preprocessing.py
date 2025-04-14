@@ -1,4 +1,6 @@
 from transformers import AutoTokenizer
+from clearml import Task
+task = Task.init(project_name='EduRegulation-Retrieval', task_name='Preprocessing')
 
 def get_tokenizer(model_name: str = "vinai/phobert-base"):
     return AutoTokenizer.from_pretrained(model_name)
