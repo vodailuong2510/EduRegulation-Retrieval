@@ -7,7 +7,7 @@ services:
     environment:
       - MONGO_INITDB_DATABASE=test
       - MONGO_INITDB_ROOT_USERNAME=admin
-      - MONGO_INITDB_ROOT_PASSWORD=123456780
+      - MONGO_INITDB_ROOT_PASSWORD=123456789
     volumes:
       - ./mongo-entrypoint:/docker-entrypoint-initdb.d
       - mongodb:/data/db
@@ -23,7 +23,7 @@ services:
       - MONGO_SERVER=my-mongodb
       - MONGO_INITDB_DATABASE=test
       - MONGO_INITDB_ROOT_USERNAME=admin
-      - MONGO_INITDB_ROOT_PASSWORD=123456780
+      - MONGO_INITDB_ROOT_PASSWORD=123456789
     networks:
       - mongo_net
     depends_on:

@@ -1,4 +1,3 @@
-import pandas as pd
 from transformers import pipeline
 from .retrieve import retrieve_document
 
