@@ -25,7 +25,6 @@ def split_document(file_contents):
 
     splits = {
         doc['file_name']: {
-            "link": doc['link'],
             "splits": [node.text for node in splitter([Document(text=doc['content'])])]
         }
         for doc in tqdm(file_contents, desc="Splitting documents...", unit="doc")
@@ -37,14 +36,11 @@ def formating_chunk(splitted_chunks):
     metas = []
 
     for filename, splitted_doc in splitted_chunks.items():
-        link = splitted_doc["link"] 
-
         for chunk in splitted_doc["splits"]:
             md_splits.append(chunk)
 
             metas.append({
                 "filename": filename, 
-                "link": link, 
             })
 
     return md_splits, metas
@@ -61,8 +57,6 @@ if __name__ == "__main__":
     data= load_data(
         folder_path=text_path,
     )
-
-    print(data[:2])
 
     splits = split_document(data)
 
