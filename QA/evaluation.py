@@ -6,7 +6,7 @@ def compute_em(predictions, references):
     em_score = metric.compute(predictions=predictions, references=references)
     return em_score
 
-def evaluate_model(test_dataset, model_name_or_path= "vodailuong2510/saved_model"):
+def evaluate_model(test_dataset, model_name_or_path= "vodailuong2510/MLops"):
     predictions = []
     references = []
 
