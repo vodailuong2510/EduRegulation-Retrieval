@@ -9,8 +9,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
     <link rel="icon" type="image/png" href="/static/logo.png">
     <style>
-        body, h1, h2, p, span, input, button {
+        h1, h2, p, span, input, button {
             font-family: 'Inter', sans-serif;
+        }
+        
+        body{
+            overflow: hidden;
+            font-family: 'Inter', sans-serif;  
         }
         
         .main-content {
@@ -44,8 +49,13 @@
             padding: 1rem;
             margin-bottom: 1rem;
             max-width: 80%;
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+            word-break: break-word;
         }
-
+        .response-block > *:last-child {
+            margin-bottom: 0;
+        }
         .response-block.user {
             color: black;
             background-color: #E3EAFD;
@@ -119,6 +129,10 @@
 </head>
 <body class="bg-gray-100 text-black h-screen flex">
     <div id="main-content" class="main-content flex flex-col justify-center items-center bg-gray-100 relative">
+        <button onclick="clearHistory()" class="absolute top-4 left-4 p-2 text-gray-600 hover:text-red-500 transition-colors">
+            <i class="fas fa-trash"></i>
+        </button>
+
         <h1  id="welcome-message" class="text-2xl font-semibold mb-8">Mình có thể giúp gì cho bạn?</h1>
         <div id="chat-container" class="w-full max-w-4xl flex flex-col space-y-4">
             <!-- Chat responses will be appended here -->
@@ -134,6 +148,72 @@
     </div>
 
     <script>
+        async function loadHistory() {
+            const chatContainer = document.getElementById('chat-container');
+            const welcomeMessage = document.getElementById('welcome-message');
+
+            try {
+                const res = await fetch(`${window.location.origin}/history`);
+                const history = await res.json();
+
+                if (history.length > 0) {
+                    welcomeMessage.style.display = 'none';
+                    chatContainer.classList.add('has-messages');
+                }
+
+                history.forEach(msg => {
+                    const messageDiv = document.createElement('div');
+                    messageDiv.className = `response-block ${msg.sender === "user" ? "user" : "system"}`;
+                    messageDiv.innerHTML = applyTailwindClasses(marked.parse(msg.content));
+                    chatContainer.appendChild(messageDiv);
+                });
+
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+
+            } catch (err) {
+                console.error("Failed to load history:", err);
+            }
+        }
+        window.addEventListener('DOMContentLoaded', loadHistory);
+
+        async function clearHistory() {
+            if (confirm('Bạn có chắc muốn xóa toàn bộ lịch sử trò chuyện?')) {
+                try {
+                    const response = await fetch(`${window.location.origin}/clear-history`, {
+                        method: 'GET' // Thay đổi từ POST sang GET
+                    });
+                    
+                    if (response.ok) {
+                        const chatContainer = document.getElementById('chat-container');
+                        chatContainer.innerHTML = '';
+                        chatContainer.classList.remove('has-messages');
+                        document.getElementById('welcome-message').style.display = 'block';
+                    } else {
+                        alert('Không thể xóa lịch sử trò chuyện. Vui lòng thử lại sau.');
+                    }
+                } catch (error) {
+                    console.error('Error clearing chat history:', error);
+                    alert('Đã xảy ra lỗi khi xóa lịch sử trò chuyện.');
+                }
+            }
+        };
+
+        function disableInput(disable) {
+            const userInput = document.getElementById('user-input');
+            const sendButton = document.querySelector('button[onclick="sendMessage()"]');
+            
+            userInput.disabled = disable;
+            sendButton.disabled = disable;
+            
+            if (disable) {
+                userInput.placeholder = "Đang chờ phản hồi...";
+                sendButton.classList.add('opacity-50', 'cursor-not-allowed');
+            } else {
+                userInput.placeholder = "Câu hỏi của bạn là gì?";
+                sendButton.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+        }
+
         async function sendMessage() {
             const userInput = document.getElementById('user-input');
             const chatContainer = document.getElementById('chat-container');
@@ -141,6 +221,8 @@
             const chatBox = document.getElementById('chat-box');
 
             if (userInput.value.trim() !== "") {
+                disableInput(true);
+
                 if (chatContainer.children.length === 0) {
                     welcomeMessage.style.display = 'none';
                     chatContainer.classList.add('has-messages');
@@ -149,6 +231,7 @@
                 const userResponse = document.createElement('div');
                 userResponse.className = 'response-block user';
                 userResponse.textContent = userInput.value;
+                userResponse.innerHTML = userInput.value.replace(/\n/g, '<br>');
                 chatContainer.appendChild(userResponse);
 
                 const userMessage = userInput.value;
@@ -162,14 +245,15 @@
                 chatContainer.scrollTop = chatContainer.scrollHeight;
 
                 try {
-                    const response = await fetch("http://127.0.0.1:8000/chat", {
+                    const response = await fetch(`${window.location.origin}/chat`, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({message: userMessage}),
                     });
 
                     if (!response.ok) {
-                        throw new Error('Network response was not ok');
+                        chatContainer.removeChild(typingIndicator);
+                        throw new Error('Kết nối mạng không ổn định. Vui lòng thử lại.');
                     }
 
                     const systemResponse = document.createElement('div');
@@ -199,11 +283,16 @@
                             isFirstChunk = false;
                         }
                     }
+
+                    disableInput(false);
                 } catch (error) {
                     const errorResponse = document.createElement('div');
                     errorResponse.className = 'response-block system';
                     errorResponse.textContent = 'Xin lỗi, đã có lỗi xảy ra. Vui lòng thử lại.';
                     chatContainer.appendChild(errorResponse);
+                    chatContainer.removeChild(typingIndicator);
+
+                    disableInput(false);
                 }
 
                 chatContainer.scrollTop = chatContainer.scrollHeight;
@@ -227,6 +316,7 @@
 
             return tempDiv.innerHTML;
         }
+
         document.getElementById('user-input').addEventListener('keydown', function(event) {
         if (event.key === 'Enter') {
             if (event.shiftKey) {

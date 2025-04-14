@@ -11,7 +11,7 @@ def retrieve_document(query: str=""):
     result = collection.query.hybrid(
         query=query,
         vector=query_vector,
-        limit=10,
+        limit=1,
         alpha=0.7,
     )
     
@@ -20,7 +20,7 @@ def retrieve_document(query: str=""):
         context.append(f"filename: {o.properties['filename']}\ncontent:\n{o.properties['content']}")
 
     client.close()
-    
+
     return "\n\n".join(context)
 
 if __name__ == "__main__":

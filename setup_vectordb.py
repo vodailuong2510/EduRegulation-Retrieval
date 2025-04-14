@@ -13,6 +13,7 @@ GEMINI = os.getenv("GEMINI")
 
 pdf_folder= "./data/pdf"
 text_path= "./data/documents"
+dataset_path= "./data/dataset"
 tesseract_path= r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 lang="vie"
 
@@ -55,7 +56,7 @@ if __name__ == "__main__":
     )
 
     data= load_data(
-        folder_path=text_path,
+        folder_path=dataset_path,
     )
 
     splits = split_document(data)
