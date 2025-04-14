@@ -1,6 +1,5 @@
 import evaluate
 import numpy as np
-from datasets import load_metric
 from transformers import AutoModelForQuestionAnswering, TrainingArguments, Trainer
 from .preprocessing import get_tokenizer
 

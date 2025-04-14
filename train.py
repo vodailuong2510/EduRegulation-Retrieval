@@ -29,13 +29,15 @@ def objective(trial, tokenized_dataset, data_collator, model_name_or_path, save_
     return metrics.get('f1', 0.0)
 
 if __name__ == "__main__":
-    mlflow.set_tracking_uri("file:///c:/Users/vodai/OneDrive/Documents/EduRegulation-Retrieval/mlruns")
+    mlflow.set_tracking_uri("./mlruns")
     mlflow.set_experiment("XLM-RoBERTa QA Model Optimization")
     
-    dataset = load_dataset("./data")
+    dataset = load_dataset("./data/finetune")
     model_name_or_path = "vodailuong2510/saved_model" if os.path.exists("./results/saved_model") else "xlm-roberta-base" 
     data_collator = DefaultDataCollator()
     save_path = "./results/saved_model"
+
+    print(dataset)
 
     tokenized_dataset = dataset.map(
         lambda examples: preprocessing(examples, model_name=model_name_or_path), 
