@@ -1,8 +1,6 @@
 # Use root/example as user/password credentials
 version: '8.0'
-
 services:
-
   mongo:
     image: mongo
     restart: always
