@@ -1,0 +1,259 @@
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>ChatGPT Interface</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
+    <link rel="icon" type="image/png" href="/static/logo.png">
+    <style>
+        body, h1, h2, p, span, input, button {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .sidebar {
+            transition: width 0.3s;
+            background-color: #1A1A1D; 
+            width: 16rem;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 1rem;
+            font-size: 0.8rem; 
+        }
+
+        .sidebar.collapsed {
+            width: 4rem;
+        }
+        
+        .sidebar.collapsed .sidebar-content {
+            visibility: hidden;
+            height: 0;
+        }
+
+        .sidebar-icons {
+            display: none;
+            justify-content: center;
+            align-items: center;
+            height: 4rem;
+        }
+        .sidebar.collapsed .sidebar-icons {
+            display: flex;
+        }
+
+        .sidebar h1 {
+            font-size: 1.1rem;
+        }
+
+        /* Main Content */
+        .main-content {
+            transition: margin-left 0.3s;
+            width: calc(100% - 16rem);
+            height: 100vh;
+            padding: 2rem;
+        }
+        .main-content.collapsed {
+            margin-left: 4rem;
+            width: calc(100% - 4rem);
+        }
+
+        .separator {
+            border-bottom: 1px solid #BDC3C7;
+            margin-bottom: 1.5rem;
+        }
+
+        .settings {
+            display: flex;
+            align-items: center;
+        }
+
+        .response-block {
+            background-color: #f1f1f1;
+            border-radius: 1rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            max-width: 80%;
+        }
+
+        .response-block.user {
+            color: #ffffff;
+            background-color: #666666;
+            align-self: flex-end;
+        }
+
+        .response-block.system {
+            color: #ffffff;
+            background-color: #666666;;
+            align-self: flex-start;
+        }
+
+        .chat-box {
+            width: 100%;
+            max-width: 4xl;
+            position: absolute;
+            bottom: 4rem;
+        }
+
+        #chat-container {
+            display: flex;
+            flex-direction: column;
+        }
+
+        #chat-container.has-messages {
+            height: calc(100vh - 16rem);
+            overflow-y: auto;
+            scrollbar-width: none; /* Thu nhỏ thanh cuộn */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-black h-screen flex">
+    <!-- Sidebar -->
+    <div id="sidebar" class="sidebar text-white">
+        <div>
+            <div class="sidebar-icons">
+                <button onclick="toggleSidebar()">
+                    <i id="toggle-icon-collapsed" class="fas fa-caret-right fa-2x"></i>
+                </button>
+            </div>
+
+            <div class="flex items-center justify-between mb-6">
+                <h1 class="text-xl font-semibold sidebar-content">CEDUIT</h1>
+                <button onclick="toggleSidebar()">
+                    <i id="toggle-icon" class="fas fa-caret-left fa-2x"></i>
+                </button>
+            </div>
+            <hr class="border-gray-300 mb-6"/>
+
+            <div class="mb-6">
+                <div class="flex items-center mb-4">
+                    <i class="fas fa-comment text-xl mr-2"></i>
+                    <span class="sidebar-content">Đoạn chat mới</span>
+                </div>
+                <div class="flex items-center">
+                    <i class="fas fa-search text-lg mr-2"></i>
+                    <span class="sidebar-content">Tìm kiếm</span>
+                </div>
+            </div>
+
+            <div class="sidebar-content">
+                <h2 class="text-sm text-gray-200 mb-2">Hôm qua</h2>
+                <p>Điều kiện tốt nghiệp khoa học máy tính</p>
+            </div>
+
+            <div class="sidebar-content mt-4">
+                <h2 class="text-sm text-gray-200 mb-2">Một tuần trước</h2>
+                <p>Đầu ra tiếng Anh IELTS</p>
+            </div>
+        </div>
+
+        <div class="settings">
+            <i class="fas fa-cog text-xl mr-2"></i>
+            <span class="sidebar-content">Cài đặt</span>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div id="main-content" class="main-content flex flex-col justify-center items-center bg-gray-100 relative">
+        <div class="absolute top-4 right-4 flex space-x-4">
+            <button><i class="fas fa-share-square text-xl"></i></button>
+            <button class="bg-white rounded-full p-2"><i class="fas fa-user text-xl text-gray-900"></i></button>
+        </div>
+        <h1  id="welcome-message" class="text-2xl font-semibold mb-8">Mình có thể giúp gì cho bạn?</h1>
+        <div id="chat-container" class="w-full max-w-4xl flex flex-col space-y-4">
+            <!-- Chat responses will be appended here -->
+        </div>
+        <div id="chat-box" class="w-full max-w-4xl">
+            <div class="bg-white p-4 rounded-3xl shadow-lg">
+                <input id="user-input" class="bg-transparent flex-grow text-black outline-none w-full mb-4" placeholder="Câu hỏi của bạn là gì?" type="text"/>
+                <div class="flex justify-end space-x-4">
+                    <button><i class="fas fa-microphone text-xl"></i></button>
+                    <button onclick="sendMessage()"><i class="fas fa-paper-plane text-xl"></i></button>
+                </div>
+            </div>
+        </div>
+        <div class="absolute bottom-4 right-4">
+            <i class="fas fa-question-circle text-xl"></i>
+        </div>
+
+        <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-center">
+            <p class="text-sm text-gray-600">CEDUIT có thể mắc lỗi khi trả lời. Nếu có thắc mắc hãy liên hệ với chúng tôi.</p>
+        </div>
+    </div>
+
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('main-content');
+            const toggleIcon = document.getElementById('toggle-icon');
+            const toggleIconCollapsed = document.getElementById('toggle-icon-collapsed');
+
+            sidebar.classList.toggle('collapsed');
+            mainContent.classList.toggle('collapsed');
+
+            if (sidebar.classList.contains('collapsed')) {
+                toggleIcon.style.display = 'none';
+                toggleIconCollapsed.style.display = 'block';
+            } else {
+                toggleIcon.style.display = 'block';
+                toggleIconCollapsed.style.display = 'none';
+            }
+        }
+
+        async function sendMessage() {
+            const userInput = document.getElementById('user-input');
+            const chatContainer = document.getElementById('chat-container');
+            const welcomeMessage = document.getElementById('welcome-message');
+            const chatBox = document.getElementById('chat-box');
+
+            if (userInput.value.trim() !== "") {
+                if (chatContainer.children.length === 0) {
+                    welcomeMessage.style.display = 'none';
+                    chatContainer.classList.add('has-messages');
+                }
+
+                // Hiển thị tin nhắn của người dùng
+                const userResponse = document.createElement('div');
+                userResponse.className = 'response-block user';
+                userResponse.textContent = userInput.value;
+                chatContainer.appendChild(userResponse);
+
+                const userMessage = userInput.value;
+                userInput.value = ""; // Xóa nội dung input sau khi gửi
+
+                // Gửi yêu cầu đến FastAPI
+                try {
+                    const response = await fetch("http://127.0.0.1:8000/chat", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ message: userMessage }),
+                    });
+
+                    const data = await response.json();
+
+                    // Hiển thị phản hồi từ hệ thống
+                    const systemResponse = document.createElement('div');
+                    systemResponse.className = 'response-block system';
+                    systemResponse.innerHTML = marked.parse(data.reply);
+                    chatContainer.appendChild(systemResponse);
+                } catch (error) {
+                    console.error("Lỗi kết nối API:", error);
+                }
+
+                // Cuộn xuống cuối cùng của khung chat
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
+        }
+
+        document.getElementById('user-input').addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault(); // Ngăn chặn xuống dòng trong ô nhập
+                sendMessage();
+            }
+        });
+
+    </script>
+</body>
+</html>
