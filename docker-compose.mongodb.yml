@@ -1,38 +1,22 @@
+# Use root/example as user/password credentials
+version: '8.0'
+
 services:
-  my-mongodb:
-    image: mongo:4.2.3-bionic
-    container_name: my-mongodb
+
+  mongo:
+    image: mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+
+  mongo-express:
+    image: mongo-express
+    restart: always
     ports:
-      - 27017:27017
+      - 8081:8081
     environment:
-      - MONGO_INITDB_DATABASE=test
-      - MONGO_INITDB_ROOT_USERNAME=admin
-      - MONGO_INITDB_ROOT_PASSWORD=123456789
-    volumes:
-      - ./mongo-entrypoint:/docker-entrypoint-initdb.d
-      - mongodb:/data/db
-      - mongoconfig:/data/configdb
-    networks:
-      - mongo_net
-
-  my-mongoclient:
-    build: ./my-mongoclient
-    image: fabianlee/my-mongoclient:3.9
-    container_name: my-mongoclient
-    environment:
-      - MONGO_SERVER=my-mongodb
-      - MONGO_INITDB_DATABASE=test
-      - MONGO_INITDB_ROOT_USERNAME=admin
-      - MONGO_INITDB_ROOT_PASSWORD=123456789
-    networks:
-      - mongo_net
-    depends_on:
-      - my-mongodb
-    
-volumes:
-  mongodb:
-  mongoconfig:
-
-networks:
-  mongo_net:
-    driver: bridge
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: example
+      ME_CONFIG_MONGODB_URL: mongodb://root:example@mongo:27017/
+      ME_CONFIG_BASICAUTH: false
