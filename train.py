@@ -1,12 +1,19 @@
 import os
+from dotenv import load_dotenv, find_dotenv
+load_dotenv(find_dotenv())
+
+import optuna
 import mlflow
 import mlflow.pytorch
-import optuna
 from optuna.integration.mlflow import MLflowCallback
+from huggingface_hub import login
+
 from QA.utils import load_dataset
 from QA.preprocessing import preprocessing
 from QA.models import train_bert_model
 from transformers import DefaultDataCollator
+
+login(token=os.getenv("HUGGING_FACE"))
 
 def objective(trial, tokenized_dataset, data_collator, model_name_or_path, save_path):
     learning_rate = trial.suggest_float("learning_rate", 1e-5, 5e-5, log=True)
@@ -33,7 +40,7 @@ if __name__ == "__main__":
     mlflow.set_experiment("XLM-RoBERTa QA Model Optimization")
     
     dataset = load_dataset("./data/finetune")
-    model_name_or_path = "vodailuong2510/saved_model" if os.path.exists("./results/saved_model") else "xlm-roberta-base" 
+    model_name_or_path = "vodailuong2510/MLops" if os.path.exists("./results/saved_model") else "xlm-roberta-base" 
     data_collator = DefaultDataCollator()
     save_path = "./results/saved_model"
 

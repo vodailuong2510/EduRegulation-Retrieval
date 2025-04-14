@@ -7,7 +7,7 @@ logging.set_verbosity_error()
 if __name__ == "__main__":
     dataset = load_dataset("./data")
 
-    model_path = "vodailuong2510/saved_model"
+    model_path = "vodailuong2510/MLops"
     
     val_dataset = dataset["val"]
     test_dataset = dataset["test"]
