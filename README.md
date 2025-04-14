@@ -102,7 +102,16 @@ python test.py
 cd web
 uvicorn backend:app --host 0.0.0.0 --port 8000 --reload
 ```
-
+- For ClearML first you have to connect to the ClearML server, the default server URL is: https://app.clear.ml
+```bash
+clearml-init
+```
+Then the terminal ask you to provide the API Credentials
+- On the website, create a workspace then it will generate the Access Key and Secret Key, just copy it and paste to the terminal
+- After that you can manage and view the pipeline:
+```bash
+python pipeline.py
+```
 ## License
 Distributed under the Unlicense License. See LICENSE.txt for more information.
 
