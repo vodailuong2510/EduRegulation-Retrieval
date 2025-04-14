@@ -17,11 +17,11 @@ def retrieve_document(query: str=""):
     
     context= []
     for o in result.objects:
-        context.append(f"filename: {o.properties['filename']}\nlink: {o.properties['link']}\ncontent:\n{o.properties['content']}")
+        context.append(f"filename: {o.properties['filename']}\ncontent:\n{o.properties['content']}")
 
     client.close()
     
     return "\n\n".join(context)
 
 if __name__ == "__main__":
-    print(retrieve_document("Quyết định Thành lập Ban điều hành Galaxy Holdings")) 
+    print(retrieve_document("Quy định đầu ra anh văn")) 
