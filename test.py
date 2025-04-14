@@ -1,4 +1,4 @@
-from QA.evaluate import evaluate_model
+from QA.evaluation import evaluate_model
 from QA.utils import load_dataset
 from transformers import  logging
 
