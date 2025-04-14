@@ -6,6 +6,7 @@ This project is designed to retrieve and provide information about academic poli
 
 By combining retrieval techniques with large language models (LLMs), the system ensures that users receive relevant and context-aware responses to their queries related to UIT's academic rules, procedures, and general policies.
 
+![Retriver](.\images\retriver.png)
 ---
 
 ## ⚙️ Technologies Used
@@ -32,6 +33,7 @@ This system leverages cutting-edge technologies in the fields of Natural Languag
 
 These components work together to create a scalable, maintainable, and high-performance system capable of delivering trustworthy policy-related information to students and faculty at UIT.
 
+![Training](.\images\training.png)
 ---
 
 ## ✨ Features
