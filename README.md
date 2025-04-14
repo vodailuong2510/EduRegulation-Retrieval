@@ -4,6 +4,8 @@
 
 This project is designed to retrieve and provide information about academic policies and regulations at the University of Information Technology (UIT). It aims to support students and faculty members by delivering accurate and up-to-date information quickly and efficiently.
 
+The data collected by the team is from PDF files regarding the regulations and training policies of the University of Information Technology (UIT), available at the following link: https://student.uit.edu.vn/qui-che-qui-dinh-qui-trinh
+
 By combining retrieval techniques with large language models (LLMs), the system ensures that users receive relevant and context-aware responses to their queries related to UIT's academic rules, procedures, and general policies.
 
 <p align="center">

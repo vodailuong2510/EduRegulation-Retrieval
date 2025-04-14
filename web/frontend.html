@@ -2,7 +2,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>ChatGPT Interface</title>
+    <title>GTS Chatbot</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
@@ -12,48 +12,16 @@
         body, h1, h2, p, span, input, button {
             font-family: 'Inter', sans-serif;
         }
-
-        .sidebar {
-            transition: width 0.3s;
-            background-color: #1A1A1D; 
-            width: 16rem;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            padding: 1rem;
-            font-size: 0.8rem; 
-        }
-
-        .sidebar.collapsed {
-            width: 4rem;
-        }
         
-        .sidebar.collapsed .sidebar-content {
-            visibility: hidden;
-            height: 0;
-        }
-
-        .sidebar-icons {
-            display: none;
-            justify-content: center;
-            align-items: center;
-            height: 4rem;
-        }
-        .sidebar.collapsed .sidebar-icons {
-            display: flex;
-        }
-
-        .sidebar h1 {
-            font-size: 1.1rem;
-        }
-
-        /* Main Content */
         .main-content {
             transition: margin-left 0.3s;
-            width: calc(100% - 16rem);
+            width: 100%;
             height: 100vh;
             padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
         }
         .main-content.collapsed {
             margin-left: 4rem;
@@ -79,14 +47,15 @@
         }
 
         .response-block.user {
-            color: #ffffff;
-            background-color: #666666;
+            color: black;
+            background-color: #E3EAFD;
             align-self: flex-end;
         }
 
+
         .response-block.system {
-            color: #ffffff;
-            background-color: #666666;;
+            color: black;
+            background-color: #F1F1F1;
             align-self: flex-start;
         }
 
@@ -100,108 +69,71 @@
         #chat-container {
             display: flex;
             flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 1rem;
         }
 
         #chat-container.has-messages {
             height: calc(100vh - 16rem);
             overflow-y: auto;
-            scrollbar-width: none; /* Thu nhỏ thanh cuộn */
+            scrollbar-width: none; 
+        }
+        #user-input {
+            line-height: 1.0;
+            min-height: auto; 
+            resize: none; 
+        }
+
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .typing-indicator span {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background-color: #999;
+            border-radius: 50%;
+            animation: typing 1s infinite;
+        }
+
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% {
+                transform: translateY(0);
+            }
+            30% {
+                transform: translateY(-8px);
+            }
         }
     </style>
 </head>
 <body class="bg-gray-100 text-black h-screen flex">
-    <!-- Sidebar -->
-    <div id="sidebar" class="sidebar text-white">
-        <div>
-            <div class="sidebar-icons">
-                <button onclick="toggleSidebar()">
-                    <i id="toggle-icon-collapsed" class="fas fa-caret-right fa-2x"></i>
-                </button>
-            </div>
-
-            <div class="flex items-center justify-between mb-6">
-                <h1 class="text-xl font-semibold sidebar-content">CEDUIT</h1>
-                <button onclick="toggleSidebar()">
-                    <i id="toggle-icon" class="fas fa-caret-left fa-2x"></i>
-                </button>
-            </div>
-            <hr class="border-gray-300 mb-6"/>
-
-            <div class="mb-6">
-                <div class="flex items-center mb-4">
-                    <i class="fas fa-comment text-xl mr-2"></i>
-                    <span class="sidebar-content">Đoạn chat mới</span>
-                </div>
-                <div class="flex items-center">
-                    <i class="fas fa-search text-lg mr-2"></i>
-                    <span class="sidebar-content">Tìm kiếm</span>
-                </div>
-            </div>
-
-            <div class="sidebar-content">
-                <h2 class="text-sm text-gray-200 mb-2">Hôm qua</h2>
-                <p>Điều kiện tốt nghiệp khoa học máy tính</p>
-            </div>
-
-            <div class="sidebar-content mt-4">
-                <h2 class="text-sm text-gray-200 mb-2">Một tuần trước</h2>
-                <p>Đầu ra tiếng Anh IELTS</p>
-            </div>
-        </div>
-
-        <div class="settings">
-            <i class="fas fa-cog text-xl mr-2"></i>
-            <span class="sidebar-content">Cài đặt</span>
-        </div>
-    </div>
-
-    <!-- Main Content -->
     <div id="main-content" class="main-content flex flex-col justify-center items-center bg-gray-100 relative">
-        <div class="absolute top-4 right-4 flex space-x-4">
-            <button><i class="fas fa-share-square text-xl"></i></button>
-            <button class="bg-white rounded-full p-2"><i class="fas fa-user text-xl text-gray-900"></i></button>
-        </div>
         <h1  id="welcome-message" class="text-2xl font-semibold mb-8">Mình có thể giúp gì cho bạn?</h1>
         <div id="chat-container" class="w-full max-w-4xl flex flex-col space-y-4">
             <!-- Chat responses will be appended here -->
         </div>
-        <div id="chat-box" class="w-full max-w-4xl">
-            <div class="bg-white p-4 rounded-3xl shadow-lg">
-                <input id="user-input" class="bg-transparent flex-grow text-black outline-none w-full mb-4" placeholder="Câu hỏi của bạn là gì?" type="text"/>
-                <div class="flex justify-end space-x-4">
-                    <button><i class="fas fa-microphone text-xl"></i></button>
-                    <button onclick="sendMessage()"><i class="fas fa-paper-plane text-xl"></i></button>
-                </div>
+        <div id="chat-box" class="w-full max-w-4xl flex items-end">
+            <div class="bg-white p-4 rounded-3xl shadow-lg flex items-center space-x-4 w-full">
+                <textarea id="user-input" class="bg-transparent flex-grow text-black outline-none w-full h-auto min-h-[40px] resize-none p-2" placeholder="Câu hỏi của bạn là gì?" rows="1"></textarea>
+                <button onclick="sendMessage()" class="shrink-0 flex items-center justify-center h-10 w-10 self-end mb-2">
+                    <i class="fas fa-paper-plane text-xl"></i>
+                </button>
             </div>
-        </div>
-        <div class="absolute bottom-4 right-4">
-            <i class="fas fa-question-circle text-xl"></i>
-        </div>
-
-        <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-center">
-            <p class="text-sm text-gray-600">CEDUIT có thể mắc lỗi khi trả lời. Nếu có thắc mắc hãy liên hệ với chúng tôi.</p>
         </div>
     </div>
 
     <script>
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const mainContent = document.getElementById('main-content');
-            const toggleIcon = document.getElementById('toggle-icon');
-            const toggleIconCollapsed = document.getElementById('toggle-icon-collapsed');
-
-            sidebar.classList.toggle('collapsed');
-            mainContent.classList.toggle('collapsed');
-
-            if (sidebar.classList.contains('collapsed')) {
-                toggleIcon.style.display = 'none';
-                toggleIconCollapsed.style.display = 'block';
-            } else {
-                toggleIcon.style.display = 'block';
-                toggleIconCollapsed.style.display = 'none';
-            }
-        }
-
         async function sendMessage() {
             const userInput = document.getElementById('user-input');
             const chatContainer = document.getElementById('chat-container');
@@ -214,45 +146,109 @@
                     chatContainer.classList.add('has-messages');
                 }
 
-                // Hiển thị tin nhắn của người dùng
                 const userResponse = document.createElement('div');
                 userResponse.className = 'response-block user';
                 userResponse.textContent = userInput.value;
                 chatContainer.appendChild(userResponse);
 
                 const userMessage = userInput.value;
-                userInput.value = ""; // Xóa nội dung input sau khi gửi
+                userInput.value = "";
 
-                // Gửi yêu cầu đến FastAPI
+                const typingIndicator = document.createElement('div');
+                typingIndicator.className = 'response-block system typing-indicator';
+                typingIndicator.innerHTML = '<span></span><span></span><span></span>';
+                chatContainer.appendChild(typingIndicator);
+
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+
                 try {
                     const response = await fetch("http://127.0.0.1:8000/chat", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ message: userMessage }),
+                        body: JSON.stringify({message: userMessage}),
                     });
 
-                    const data = await response.json();
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
 
-                    // Hiển thị phản hồi từ hệ thống
                     const systemResponse = document.createElement('div');
                     systemResponse.className = 'response-block system';
-                    systemResponse.innerHTML = marked.parse(data.reply);
                     chatContainer.appendChild(systemResponse);
+
+                    const reader = response.body.getReader();
+                    const decoder = new TextDecoder();
+                    let fullResponse = '';
+
+                    let isFirstChunk = true;
+
+                    while (true) {
+                        const { done, value } = await reader.read();
+                        
+                        if (done) break;
+                        
+                        const chunk = decoder.decode(value);
+                        fullResponse += chunk;
+                        
+                        systemResponse.innerHTML = applyTailwindClasses(marked.parse(fullResponse));
+
+                        chatContainer.scrollTop = chatContainer.scrollHeight;
+
+                        if (isFirstChunk) {
+                            chatContainer.removeChild(typingIndicator);
+                            isFirstChunk = false;
+                        }
+                    }
                 } catch (error) {
-                    console.error("Lỗi kết nối API:", error);
+                    const errorResponse = document.createElement('div');
+                    errorResponse.className = 'response-block system';
+                    errorResponse.textContent = 'Xin lỗi, đã có lỗi xảy ra. Vui lòng thử lại.';
+                    chatContainer.appendChild(errorResponse);
                 }
 
-                // Cuộn xuống cuối cùng của khung chat
                 chatContainer.scrollTop = chatContainer.scrollHeight;
             }
         }
 
+        function applyTailwindClasses(htmlContent) {
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = htmlContent;
+
+            tempDiv.querySelectorAll('h1').forEach(el => el.className = 'text-2xl font-bold mb-4');
+            tempDiv.querySelectorAll('h2').forEach(el => el.className = 'text-xl font-semibold mb-3');
+            tempDiv.querySelectorAll('h3').forEach(el => el.className = 'text-lg font-medium mb-2');
+            tempDiv.querySelectorAll('p').forEach(el => el.className = 'mb-4 text-gray-700');
+            tempDiv.querySelectorAll('ul').forEach(el => el.className = 'list-disc list-inside mb-4 pl-4');
+            tempDiv.querySelectorAll('li').forEach(el => el.className = 'mb-2');
+            tempDiv.querySelectorAll('a').forEach(el => el.className = 'text-blue-500 underline hover:text-blue-700');
+            tempDiv.querySelectorAll('blockquote').forEach(el => el.className = 'border-l-4 border-gray-400 italic pl-4 text-gray-600');
+            tempDiv.querySelectorAll('table').forEach(el => el.className = 'border-collapse border border-gray-300 w-full my-4');
+            tempDiv.querySelectorAll('th, td').forEach(el => el.className = 'border border-gray-300 px-4 py-2 text-left');
+
+            return tempDiv.innerHTML;
+        }
         document.getElementById('user-input').addEventListener('keydown', function(event) {
-            if (event.key === 'Enter') {
-                event.preventDefault(); // Ngăn chặn xuống dòng trong ô nhập
+        if (event.key === 'Enter') {
+            if (event.shiftKey) {
+                const start = this.selectionStart;
+                const end = this.selectionEnd;
+                const value = this.value;
+                
+                this.value = value.substring(0, start) + '\n' + value.substring(end);
+                
+                this.selectionStart = this.selectionEnd = start + 1;
+            } else {
+                event.preventDefault();
                 sendMessage();
             }
+        }
+
+        document.getElementById('user-input').addEventListener('input', function() {
+            this.style.height = 'auto'; 
+            this.style.height = (this.scrollHeight) + 'px';
         });
+    
+    });
 
     </script>
 </body>
