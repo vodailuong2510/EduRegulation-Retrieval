@@ -2,6 +2,8 @@ import evaluate
 import numpy as np
 from transformers import AutoModelForQuestionAnswering, TrainingArguments, Trainer
 from .preprocessing import get_tokenizer
+from clearml import Task
+task = Task.init(project_name='EduRegulation-Retrieval', task_name='Model Definition')
 
 def train_bert_model(learning_rate:float= 2e-5, weight_decay:float= 0.01,
                batch_size:int= 16, num_train_epochs:int= 3, model_name_or_path:str= "vinai/phobert-base", 

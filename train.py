@@ -12,6 +12,8 @@ from QA.utils import load_dataset
 from QA.preprocessing import preprocessing
 from QA.models import train_bert_model
 from transformers import DefaultDataCollator
+from clearml import Task
+task = Task.init(project_name='EduRegulation-Retrieval', task_name='Training')
 
 login(token=os.getenv("HUGGING_FACE"))
 
