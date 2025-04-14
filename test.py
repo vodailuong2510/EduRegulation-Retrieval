@@ -1,6 +1,8 @@
 from QA.evaluation import evaluate_model
 from QA.utils import load_dataset
 from transformers import  logging
+from clearml import Task
+task = Task.init(project_name='EduRegulation-Retrieval', task_name='Testing')
 
 logging.set_verbosity_error()
 

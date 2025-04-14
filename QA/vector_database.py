@@ -5,7 +5,8 @@ load_dotenv(find_dotenv())
 import weaviate
 import weaviate.classes.config as wc
 from sentence_transformers import SentenceTransformer
-
+from clearml import Task
+task = Task.init(project_name='EduRegulation-Retrieval', task_name='Vector Database Build')
 
 def start_weaviate():
     client = weaviate.connect_to_local()
