@@ -1,76 +1,104 @@
-from clearml import PipelineController
+from clearml import Task, TaskTypes
+from clearml.automation import PipelineController
 
-pipe = PipelineController(
-    project='EduRegulation-Retrieval',
-    name='EduRegulation-Retrieval Pipeline',
-    version='1.0',
-)
+def create_pipeline():
+    pipe = PipelineController(
+        name='QA Training Pipeline',
+        project='EduRegulation-Retrieval',
+        version='1.0.0',
+        add_pipeline_tags=True
+    )
 
-pipe.add_step(
-    name='data_preparation',
-    base_task_project='EduRegulation-Retrieval',
-    base_task_name='Data Preparation',
-)
+    pipe.add_step(
+        name='preprocessing',
+        base_task_project='EduRegulation-Retrieval',
+        base_task_name='Preprocessing',
+        parameter_override={
+            'General/data_path': './data/finetune',
+            'General/model_name': 'xlm-roberta-base'
+        },
+        execution_queue='default'
+    )
 
-pipe.add_step(
-    name='preprocessing',
-    base_task_project='EduRegulation-Retrieval',
-    base_task_name='Preprocessing',
-    parents=['data_preparation'],
-    parameter_override={
-        'input_data_url': '${data_preparation.artifacts.processed_data.url}',
-    },
-)
+    pipe.add_step(
+        name='training',
+        base_task_project='EduRegulation-Retrieval',
+        base_task_name='Training',
+        parameter_override={
+            'General/model_name': 'xlm-roberta-base',
+            'General/num_epochs': 3,
+            'General/batch_size': 16,
+            'General/learning_rate': 2e-5,
+            'General/weight_decay': 0.01
+        },
+        parents=['preprocessing'],
+        execution_queue='default'
+    )
 
-pipe.add_step(
-    name='vector_db_build',
-    base_task_project='EduRegulation-Retrieval',
-    base_task_name='Vector Database Build',
-    parents=['preprocessing'],
-    parameter_override={
-        'processed_data_url': '${preprocessing.artifacts.cleaned_data.url}',
-    },
-)
+    pipe.add_step(
+        name='testing',
+        base_task_project='EduRegulation-Retrieval',
+        base_task_name='Testing',
+        parameter_override={
+            'General/data_path': './data',
+            'General/model_path': 'vodailuong2510/MLops'
+        },
+        parents=['training'],
+        execution_queue='default'
+    )
 
-pipe.add_step(
-    name='model_definition',
-    base_task_project='EduRegulation-Retrieval',
-    base_task_name='Model Definition',
-    parents=['vector_db_build'],
-    parameter_override={
-        'vector_db_url': '${vector_db_build.artifacts.vector_db.url}',
-    },
-)
+    pipe.add_step(
+        name='evaluation',
+        base_task_project='EduRegulation-Retrieval',
+        base_task_name='Evaluation',
+        parameter_override={
+            'General/data_path': './data',
+            'General/model_path': 'vodailuong2510/MLops'
+        },
+        parents=['testing'],
+        execution_queue='default'
+    )
 
-pipe.add_step(
-    name='training',
-    base_task_project='EduRegulation-Retrieval',
-    base_task_name='Training Model',
-    parents=['model_definition'],
-    parameter_override={
-        'vector_db_url': '${vector_db_build.artifacts.vector_db.url}',
-        'model_url': '${model_definition.artifacts.model.url}',
-    }
-)
-pipe.add_step(
-    name='testing',
-    base_task_project='EduRegulation-Retrieval',
-    base_task_name='Testing',
-    parents=['training'],
-    parameter_override={
-        'trained_model_url': '${training.artifacts.trained_model.url}',
-    }
-)
-pipe.add_step(
-    name='evaluation',
-    base_task_project='EduRegulation-Retrieval',
-    base_task_name='Evaluation',
-    parents=['testing'],
-    parameter_override={
-        'test_result_url': '${testing.artifacts.test_result.url}',
-    }
-)
+    return pipe
 
-pipe.start(queue='default')
-pipe.wait()
-pipe.stop()
+def setup_tasks():
+    preprocessing_task = Task.create(
+        project_name='EduRegulation-Retrieval',
+        task_name='Preprocessing',
+        task_type=TaskTypes.data_processing
+    )
+    preprocessing_task.set_parameter('General/data_path', './data/finetune')
+    preprocessing_task.set_parameter('General/model_name', 'xlm-roberta-base')
+    
+    training_task = Task.create(
+        project_name='EduRegulation-Retrieval',
+        task_name='Training',
+        task_type=TaskTypes.training
+    )
+    training_task.set_parameter('General/model_name', 'xlm-roberta-base')
+    training_task.set_parameter('General/num_epochs', 3)
+    training_task.set_parameter('General/batch_size', 16)
+    training_task.set_parameter('General/learning_rate', 2e-5)
+    training_task.set_parameter('General/weight_decay', 0.01)
+
+    testing_task = Task.create(
+        project_name='EduRegulation-Retrieval',
+        task_name='Testing',
+        task_type=TaskTypes.testing
+    )
+    testing_task.set_parameter('General/data_path', './data')
+    testing_task.set_parameter('General/model_path', 'vodailuong2510/MLops')
+
+    evaluation_task = Task.create(
+        project_name='EduRegulation-Retrieval',
+        task_name='Evaluation',
+        task_type=TaskTypes.testing
+    )
+    evaluation_task.set_parameter('General/data_path', './data')
+    evaluation_task.set_parameter('General/model_path', 'vodailuong2510/MLops')
+
+if __name__ == "__main__":
+    setup_tasks()
+    
+    pipeline = create_pipeline()
+    pipeline.start()

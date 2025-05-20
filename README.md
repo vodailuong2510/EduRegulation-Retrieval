@@ -86,6 +86,14 @@ dvc add data
 dvc remote add -d myremote /.dvc/dvcstore -f
 dvc push
 ```
+```bash
+## Setup ClearML
+clearml-init
+```
+- When setup ClearML first you have to create new ClearML credentials through the settings page in your `clearml-server` web app (e.g. http://localhost:8080//settings/workspace-configuration) 
+Or create a free account at https://app.clear.ml/settings/workspace-configuration
+Press "Create new credentials" then copy the configuration to clipboard and paste it.
+Wait until the credentials are verified then your ClearML setup is successful.
 - Then, extract text from PDFs and scanned PDFs, and store the processed data into Weaviate:
 
 ```bash

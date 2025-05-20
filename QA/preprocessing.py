@@ -1,6 +1,4 @@
 from transformers import AutoTokenizer
-from clearml import Task
-task = Task.init(project_name='EduRegulation-Retrieval', task_name='Preprocessing')
 
 def get_tokenizer(model_name: str = "vinai/phobert-base"):
     return AutoTokenizer.from_pretrained(model_name)
@@ -29,15 +27,16 @@ def preprocessing(examples, model_name: str = "vinai/phobert-base"):
     for i, offset in enumerate(offset_mapping):
         sample_idx = sample_map[i]
         answer = answers[sample_idx]
-        start_char = answer["answer_start"][0]
-        end_char = answer["answer_start"][0] + len(answer["text"][0])
+        valid_answer_idx = next((idx for idx, start in enumerate(answer["answer_start"]) if start != -1), 0)
+        start_char = answer["answer_start"][valid_answer_idx]
+        end_char = start_char + len(answer["text"][valid_answer_idx])
         sequence_ids = inputs.sequence_ids(i)
 
         idx = 0
         while sequence_ids[idx] != 1:
             idx += 1
         context_start = idx
-        while sequence_ids[idx] == 1:
+        while idx < len(sequence_ids) and sequence_ids[idx] == 1:
             idx += 1
         context_end = idx - 1
 
