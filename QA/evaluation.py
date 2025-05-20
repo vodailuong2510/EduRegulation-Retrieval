@@ -1,7 +1,5 @@
 import evaluate
 from .response import infer
-from clearml import Task
-task = Task.init(project_name='EduRegulation-Retrieval', task_name='Evaluation')
 
 def compute_em(predictions, references):
     metric = evaluate.load("squad")
