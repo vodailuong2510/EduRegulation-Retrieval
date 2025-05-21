@@ -41,23 +41,23 @@ class MessageRequest(BaseModel):
 async def serve_html():
     return FileResponse(HTML_PATH)
 
-# @app.get("/history")
-# async def get_history():
-#     chat_id = 1
-#     chat_history = get_last_messages(mongo_collections, chat_id=chat_id, limit=20)
+@app.get("/history")
+async def get_history():
+    chat_id = 1
+    chat_history = get_last_messages(mongo_collections, chat_id=chat_id, limit=20)
     
-#     messages = [
-#         {"sender": msg["role"], "content": msg["content"]}
-#         for msg in chat_history
-#     ]
+    messages = [
+        {"sender": msg["role"], "content": msg["content"]}
+        for msg in chat_history
+    ]
     
-#     return JSONResponse(content=messages)
+    return JSONResponse(content=messages)
 
-# @app.get("/clear-history")
-# async def clear_history():
-#     chat_id = 1
-#     delete_all_messages(mongo_collections, chat_id=chat_id)
-#     return JSONResponse(content={"message": "History cleared."})
+@app.get("/clear-history")
+async def clear_history():
+    chat_id = 1
+    delete_all_messages(mongo_collections, chat_id=chat_id)
+    return JSONResponse(content={"message": "History cleared."})
 
 
 @app.post("/chat")
@@ -74,18 +74,17 @@ async def chat(request: MessageRequest, background_tasks: BackgroundTasks):
             response.append(chunk)
             yield chunk 
 
-    # save_message(mongo_collections, chat_id=chat_id, sender="user", content=prompt)
+    async def save_response():
+        full_response = "".join(response)
+        save_message(mongo_collections, chat_id=chat_id, sender="user", content=prompt)
+        save_message(mongo_collections, chat_id=chat_id, sender="assistant", content=full_response)
 
-    # async def save_response():
-    #     full_response = "".join(response)
-    #     save_message(mongo_collections, chat_id=chat_id, sender="assistant", content=full_response)
-
-    # background_tasks.add_task(save_response)
+    background_tasks.add_task(save_response)
 
     return StreamingResponse(response_generator(), media_type="text/plain")
 
 def run():
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run("backend:app", host="0.0.0.0", port=8000, reload=True)
 
 if __name__ == "__main__":
     run()

@@ -4,3 +4,14 @@ README.md
 .gitignore
 .venv
 *.zip
+images
+LICENSE
+*.yaml
+*.yml
+reader
+.dvc
+.dvcignore
+test.py
+train.py
+setup_vectordb.py
+pipeline.py

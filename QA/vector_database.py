@@ -1,3 +1,4 @@
+import os
 from tqdm import tqdm
 from dotenv import load_dotenv, find_dotenv
 load_dotenv(find_dotenv())
@@ -7,7 +8,11 @@ import weaviate.classes.config as wc
 from sentence_transformers import SentenceTransformer
 
 def start_weaviate():
-    client = weaviate.connect_to_local()
+    client = weaviate.connect_to_local(
+        host="192.168.108.6",
+        port=8080,
+        grpc_port=50051
+    )
 
     print("Client is ready:", client.is_ready())
 
