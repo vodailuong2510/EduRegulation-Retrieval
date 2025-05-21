@@ -30,7 +30,7 @@ def create_new_collection(client):
         print("Collection created")
 
 def insert_data(client, splits, metas):
-    embedding_model = SentenceTransformer("intfloat/multilingual-e5-base")
+    embedding_model = SentenceTransformer("intfloat/multilingual-e5-large")
 
     with client.batch.dynamic() as batch:
         for md_text, meta in tqdm(zip(splits, metas), desc="Inserting into Weaviate", unit="doc"):
