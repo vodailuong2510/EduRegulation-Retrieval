@@ -65,6 +65,10 @@ docker compose -f docker-compose.mongodb.yml up -d
 
 # Start Weaviate
 docker compose -f docker-compose.weaviate.yml up -d
+
+# Start app 
+docker compose -f docker-compose.app.yml up -d
+
 ```
 - You can either run the application using Docker (see the Docker section below), or follow the steps below to set up the environment manually:
 
