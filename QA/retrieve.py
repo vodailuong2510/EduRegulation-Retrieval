@@ -5,7 +5,7 @@ def retrieve_document(query: str=""):
     client = start_weaviate()
     collection = client.collections.get("chatbot")
 
-    embedding_model = SentenceTransformer("intfloat/multilingual-e5-base")
+    embedding_model = SentenceTransformer("intfloat/multilingual-e5-large")
     query_vector = embedding_model.encode(query).tolist()
 
     result = collection.query.hybrid(
