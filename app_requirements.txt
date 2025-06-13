@@ -10,3 +10,4 @@ huggingface-hub==0.31.1
 pillow==11.2.1
 scikit-learn==1.6.1
 scipy==1.15.3
+prometheus-fastapi-instrumentator==6.1.0
