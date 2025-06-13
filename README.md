@@ -115,16 +115,14 @@ python test.py
 cd web
 uvicorn backend:app --host 0.0.0.0 --port 8000 --reload
 ```
-- For ClearML first you have to connect to the ClearML server, the default server URL is: https://app.clear.ml
+- **Monitoring service**: Grafana, Prometheus.
+- First, start the monitor services by running the docker compose
 ```bash
-clearml-init
+docker-compose -f docker-compose.monitor.yml up -d
 ```
-Then the terminal ask you to provide the API Credentials
-- On the website, create a workspace then it will generate the Access Key and Secret Key, just copy it and paste to the terminal
-- After that you can manage and view the pipeline:
-```bash
-python pipeline.py
-```
+- Then, access the Grafana and Prometheus UI using port 3000 and 9090
+- Login to Grafana, the default username is admin and the password is also admin.
+- After that, navigate to Connections > Data sources, click on "Add new data sources" then choose Prometheus, then copy your Prometheus's URL and paste to your Prometheus Data Source
 ## License
 Distributed under the Unlicense License. See LICENSE.txt for more information.
 

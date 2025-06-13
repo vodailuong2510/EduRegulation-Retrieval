@@ -9,7 +9,7 @@ from fastapi import FastAPI, BackgroundTasks
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse, FileResponse, JSONResponse
-from prometheus_fastapi_instrumentator import Instrumentator
+from prometheus_fastapi_instrumentator import Instrumentator, metrics
 
 from QA.response import reply
 from QA.retrieve import retrieve_document
@@ -23,8 +23,12 @@ mongo_collections = get_mongo_collection(MONGO_URI)
 
 app = FastAPI()
 
-# Initialize Prometheus instrumentation
-Instrumentator().instrument(app).expose(app)
+# Initialize Prometheus instrumentation with additional metrics
+instrumentator = Instrumentator()
+instrumentator.add(metrics.default())
+instrumentator.add(metrics.latency())
+instrumentator.add(metrics.requests())
+instrumentator.instrument(app).expose(app)
 
 app.add_middleware(
     CORSMiddleware,
@@ -89,4 +93,3 @@ def run():
 
 if __name__ == "__main__":
     run()
-
