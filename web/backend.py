@@ -10,6 +10,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse, FileResponse, JSONResponse
 from prometheus_fastapi_instrumentator import Instrumentator, metrics
+from prometheus_fastapi_instrumentator.metrics import Info
 
 from QA.response import reply
 from QA.retrieve import retrieve_document
@@ -28,6 +29,17 @@ instrumentator = Instrumentator()
 instrumentator.add(metrics.default())
 instrumentator.add(metrics.latency())
 instrumentator.add(metrics.requests())
+
+# Add custom metric for request duration with status code
+def http_request_duration_seconds_with_status(info: Info) -> None:
+    if info.response:
+        info.metric.labels(
+            method=info.method,
+            endpoint=info.endpoint,
+            status=str(info.response.status_code)
+        ).observe(info.modified_duration)
+
+instrumentator.add(http_request_duration_seconds_with_status)
 instrumentator.instrument(app).expose(app)
 
 app.add_middleware(

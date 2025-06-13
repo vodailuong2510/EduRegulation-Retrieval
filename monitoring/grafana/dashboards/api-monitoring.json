@@ -105,7 +105,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "rate(app_http_requests_total[5m])",
+          "expr": "rate(http_request_duration_highr_seconds_count[5m])",
           "legendFormat": "{{method}} {{endpoint}}",
           "range": true,
           "refId": "A"
@@ -198,7 +198,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "rate(app_http_request_duration_seconds_sum[5m]) / rate(app_http_request_duration_seconds_count[5m])",
+          "expr": "rate(http_request_duration_highr_seconds_sum[5m]) / rate(http_request_duration_highr_seconds_count[5m])",
           "legendFormat": "{{method}} {{endpoint}}",
           "range": true,
           "refId": "A"
@@ -291,7 +291,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "sum(rate(app_http_requests_total{status=~\"5..\"}[5m])) / sum(rate(app_http_requests_total[5m]))",
+          "expr": "sum(rate(http_request_duration_highr_seconds_count{status=~\"5..\"}[5m])) / sum(rate(http_request_duration_highr_seconds_count[5m]))",
           "legendFormat": "Error Rate",
           "range": true,
           "refId": "A"

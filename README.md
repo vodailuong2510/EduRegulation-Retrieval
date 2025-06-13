@@ -1,6 +1,7 @@
 # 📌 UIT Policies Retriever
 ## LINK VIDEO
 [VIDEO](https://drive.google.com/drive/folders/1wB7OugWjR4IahRpYnIeV5ECZLKMWDd8B?usp=drive_link)
+
 ## 🧠 Introduction
 
 This project is designed to retrieve and provide information about academic policies and regulations at the University of Information Technology (UIT). It aims to support students and faculty members by delivering accurate and up-to-date information quickly and efficiently.
@@ -35,6 +36,11 @@ This system leverages cutting-edge technologies in the fields of Natural Languag
   - *DVC (Data Version Control)*: Manages datasets and model versions efficiently.
   - *Optuna*: Performs automated hyperparameter tuning to optimize model performance.
   - *ClearML*: Provides experiment tracking, orchestration, and visualization.
+- **Monitoring Stack**:
+  - *Prometheus*: Collects and stores metrics from the application and model.
+  - *Grafana*: Visualizes metrics through interactive dashboards.
+  - *Loki*: Aggregates and stores application logs.
+  - *Promtail*: Ships logs to Loki for centralized logging.
 
 These components work together to create a scalable, maintainable, and high-performance system capable of delivering trustworthy policy-related information to students and faculty at UIT.
 
@@ -48,18 +54,65 @@ These components work together to create a scalable, maintainable, and high-perf
 - ✅ Automatically answers questions related to academic policies and regulations
 - ✅ Real-time interaction through a user-friendly interface
 - ✅ Easy to deploy locally or on a remote server
+- ✅ Comprehensive monitoring of API and Model performance
+- ✅ Centralized logging and metrics visualization
+- ✅ Automated model training and evaluation pipeline
 
 ---
 
-## Getting Started
+## 📊 Monitoring System
 
+The project includes a comprehensive monitoring system using Prometheus and Grafana to track both API and Model performance.
+
+### API Monitoring
+- Request rates by endpoint and method
+- Response time distributions
+- Error rates and status codes
+- API endpoint usage patterns
+
+### Model Monitoring
+- Model inference time (CPU Time)
+- Model confidence scores
+- Performance metrics (99th percentile)
+- Model behavior over time
+
+### System Metrics
+- System resource usage
+- Container metrics
+- Network metrics
+
+---
+
+## 📁 Project Structure
+
+```
+EduRegulation-Retrieval/
+├── web/                  # Web application (FastAPI + Frontend)
+├── QA/                   # Question Answering system
+├── reader/              # Document reader and processor
+├── monitoring/          # Monitoring system
+│   ├── prometheus/     # Prometheus configuration
+│   ├── grafana/        # Grafana dashboards
+│   ├── loki/          # Log aggregation
+│   └── promtail/      # Log shipping
+├── docker-compose.*.yml # Docker compose files
+└── [other config files]
+```
+
+## 🚀 Getting Started
+
+### Prerequisites
 - **Python version**: 3.10.16
 - Remember to create a .env file with the following keys:
    > HUGGING_FACE=your_token_here  
    > PARSER=your_llama_cloud_url_here  
-   > MONGO_URI_URI=your_mongodb_uri_here (you'll get it when you start its docker compose file below)
-- Next, start the MongoDB and Weaviate services using Docker Compose:
+   > MONGO_URI=mongodb://admin:123456789@192.168.108.6:27017?authSource=admin
+
+### Docker Setup
 ```bash
+# Create monitoring network
+docker network create monitoring_network
+
 # Start MongoDB
 docker compose -f docker-compose.mongodb.yml up -d
 
@@ -69,16 +122,19 @@ docker compose -f docker-compose.weaviate.yml up -d
 # Start app 
 docker compose -f docker-compose.app.yml up -d
 
+# Start monitoring stack
+docker compose -f docker-compose.monitor.yml up -d
 ```
-- You can either run the application using Docker (see the Docker section below), or follow the steps below to set up the environment manually:
 
+### Manual Setup
 ```bash
 # Clone the project
 git clone git@github.com:vodailuong2510/EduRegulation-Retrieval.git
 cd EduRegulation-Retrieval
 
 # Install required Python packages
-pip install -r requirements.txt
+pip install -r requirements.txt  # Main project dependencies
+pip install -r app_requirements.txt  # Web application dependencies
 
 # Install Tesseract OCR and Vietnamese language data
 sudo apt install tesseract-ocr
@@ -91,38 +147,89 @@ dvc add data
 dvc remote add -d myremote /.dvc/dvcstore -f
 dvc push
 ```
+
+### Data Version Control (DVC)
+
+The project uses DVC for data versioning and management. Key files:
+- `data.dvc`: Tracks the data directory
+- `dvc.yaml`: Defines data processing pipeline
+- `.dvcignore`: Specifies files to ignore in DVC
+
+### DVC Commands
 ```bash
-## Setup ClearML
+# Initialize DVC
+dvc init
+
+# Add data to DVC
+dvc add data
+
+# Push data to remote storage
+dvc push
+
+# Pull data from remote storage
+dvc pull
+
+# Run data pipeline
+dvc repro
+```
+
+### Setup ClearML
+```bash
 clearml-init
 ```
-- When setup ClearML first you have to create new ClearML credentials through the settings page in your `clearml-server` web app (e.g. http://localhost:8080//settings/workspace-configuration) 
-Or create a free account at https://app.clear.ml/settings/workspace-configuration
-Press "Create new credentials" then copy the configuration to clipboard and paste it.
-Wait until the credentials are verified then your ClearML setup is successful.
-- Then, extract text from PDFs and scanned PDFs, and store the processed data into Weaviate:
+When setting up ClearML for the first time, you need to create new ClearML credentials through the settings page in your `clearml-server` web app (e.g., http://localhost:8080//settings/workspace-configuration) or create a free account at https://app.clear.ml/settings/workspace-configuration. Press "Create new credentials" then copy the configuration to clipboard and paste it. Wait until the credentials are verified then your ClearML setup is successful.
 
+### Data Processing and Model Training
 ```bash
-python setup_vectordb.py  # Make sure to set the correct path of tesseract in your device
-```
-- Now, you can fine-tune BERT using MLFlow and Optuna for information extraction, and then evaluate and test the model:
-```bash
+# Extract text from PDFs and store in Weaviate
+python setup_vectordb.py
+
+# Train and evaluate the model
 python train.py
 python test.py
 ```
 
-- Or you can test the application directly by starting it:
+### Accessing the Application
+- Web Application: http://localhost:8000
+- API Documentation: http://localhost:8000/docs
+- Grafana Dashboard: http://localhost:3000 (admin/admin)
+- Prometheus: http://localhost:9090
+
+### Monitoring Dashboards
+The following dashboards are available in Grafana:
+- API Monitoring: `monitoring/grafana/dashboards/api-monitoring.json`
+- Model Monitoring: `monitoring/grafana/dashboards/model-monitoring.json`
+- System Metrics: `monitoring/grafana/dashboards/system-metrics.json`
+
+## 💻 Development
+
+### Testing
+
+The project includes automated tests for both the model and API:
+
 ```bash
+# Run model tests
+python test.py
+
+# Run API tests (from web directory)
 cd web
-uvicorn backend:app --host 0.0.0.0 --port 8000 --reload
+pytest
 ```
-- **Monitoring service**: Grafana, Prometheus.
-- First, start the monitor services by running the docker compose
-```bash
-docker-compose -f docker-compose.monitor.yml up -d
-```
-- Then, access the Grafana and Prometheus UI using port 3000 and 9090
-- Login to Grafana, the default username is admin and the password is also admin.
-- After that, navigate to Connections > Data sources, click on "Add new data sources" then choose Prometheus, then copy your Prometheus's URL and paste to your Prometheus Data Source
+
+### Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+### Development Guidelines
+- Follow PEP 8 style guide for Python code
+- Add tests for new features
+- Update documentation for any changes
+- Use meaningful commit messages
+
 ## License
 Distributed under the Unlicense License. See LICENSE.txt for more information.
 
