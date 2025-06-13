@@ -1,7 +1,6 @@
 # 📌 UIT Policies Retriever
 ## LINK VIDEO
-[Video Lab2](https://drive.google.com/drive/folders/1wB7OugWjR4IahRpYnIeV5ECZLKMWDd8B?usp=drive_link)
-[Video Lab3](https://drive.google.com/drive/folders/1wB7OugWjR4IahRpYnIeV5ECZLKMWDd8B?usp=drive_link)
+[Video Demo](https://drive.google.com/drive/folders/1wB7OugWjR4IahRpYnIeV5ECZLKMWDd8B?usp=drive_link)
 ## 🧠 Introduction
 
 This project is designed to retrieve and provide information about academic policies and regulations at the University of Information Technology (UIT). It aims to support students and faculty members by delivering accurate and up-to-date information quickly and efficiently.
