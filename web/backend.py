@@ -9,10 +9,10 @@ from fastapi import FastAPI, BackgroundTasks
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse, FileResponse, JSONResponse
+from prometheus_fastapi_instrumentator import Instrumentator
 
 from QA.response import reply
 from QA.retrieve import retrieve_document
-from QA.database import get_last_messages, save_message, get_mongo_collection
 from QA.database import get_last_messages, save_message, get_mongo_collection, delete_all_messages
 
 load_dotenv(find_dotenv())
@@ -22,6 +22,9 @@ MONGO_URI= os.getenv("MONGO_URI")
 mongo_collections = get_mongo_collection(MONGO_URI)
 
 app = FastAPI()
+
+# Initialize Prometheus instrumentation
+Instrumentator().instrument(app).expose(app)
 
 app.add_middleware(
     CORSMiddleware,
@@ -59,11 +62,9 @@ async def clear_history():
     delete_all_messages(mongo_collections, chat_id=chat_id)
     return JSONResponse(content={"message": "History cleared."})
 
-
 @app.post("/chat")
 async def chat(request: MessageRequest, background_tasks: BackgroundTasks):
     prompt = request.message
-
     chat_id= 1
     
     context = retrieve_document(query=prompt)
