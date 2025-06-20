@@ -26,20 +26,6 @@ app = FastAPI()
 
 # Initialize Prometheus instrumentation with additional metrics
 instrumentator = Instrumentator()
-instrumentator.add(metrics.default())
-instrumentator.add(metrics.latency())
-instrumentator.add(metrics.requests())
-
-# Add custom metric for request duration with status code
-def http_request_duration_seconds_with_status(info: Info) -> None:
-    if info.response:
-        info.metric.labels(
-            method=info.method,
-            endpoint=info.endpoint,
-            status=str(info.response.status_code)
-        ).observe(info.modified_duration)
-
-instrumentator.add(http_request_duration_seconds_with_status)
 instrumentator.instrument(app).expose(app)
 
 app.add_middleware(
@@ -87,7 +73,7 @@ async def chat(request: MessageRequest, background_tasks: BackgroundTasks):
     response = []
 
     async def response_generator():
-        async for chunk in reply(prompt, context, model_path="vodailuong2510/saved_model"):
+        async for chunk in reply(prompt, context, model_path="./results/saved_model"):
             response.append(chunk)
             yield chunk 
 

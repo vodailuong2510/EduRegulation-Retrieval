@@ -54,11 +54,8 @@ def process_csv_to_vectordb(csv_path):
     client = start_weaviate()
     
     # Check if collection exists
-    if not client.schema.exists("Document"):
-        print("Creating new collection...")
-        create_new_collection(client=client)
-    else:
-        print("Collection already exists, proceeding with data insertion...")
+    print("Creating new collection...")
+    create_new_collection(client=client)
     
     # Insert data into vector database
     insert_data(
@@ -71,5 +68,5 @@ def process_csv_to_vectordb(csv_path):
 
 if __name__ == "__main__":
     # Specify your CSV file path here
-    csv_path = "./zip/data/finetune/train.csv"
+    csv_path = "/home/mlops/EduRegulation-Retrieval/data/finetune/train.csv"
     process_csv_to_vectordb(csv_path)
