@@ -3,7 +3,7 @@
 [Video Demo](https://drive.google.com/drive/folders/1wB7OugWjR4IahRpYnIeV5ECZLKMWDd8B?usp=drive_link)
 ## 🧠 Introduction
 
-This project is designed to retrieve and provide information about academic policies and regulations at the University of Information Technology (UIT). It aims to support students and faculty members by delivering accurate and up-to-date information quickly and efficiently.
+This project is designed to retrieve and provide information about academic policies and regulations at the University of Information Technology (UIT). It aims to support students and faculty members by providing accurate and up-to-date information in a timely and efficient manner.
 
 The data collected by the team is from PDF files regarding the regulations and training policies of the University of Information Technology (UIT), available at the following link: https://student.uit.edu.vn/qui-che-qui-dinh-qui-trinh
 
@@ -41,7 +41,7 @@ This system leverages cutting-edge technologies in the fields of Natural Languag
   - *Loki*: Aggregates and stores application logs.
   - *Promtail*: Ships logs to Loki for centralized logging.
 
-These components work together to create a scalable, maintainable, and high-performance system capable of delivering trustworthy policy-related information to students and faculty at UIT.
+These components work together to create a scalable, maintainable, and high-performance system that delivers trustworthy policy-related information to students and faculty at UIT.
 
 <p align="center">
   <img src="https://github.com/vodailuong2510/EduRegulation-Retrieval/blob/main/images/training.png?raw=true" alt="Training" />
@@ -105,11 +105,11 @@ EduRegulation-Retrieval/
 - Remember to create a .env file with the following keys:
    > HUGGING_FACE=your_token_here  
    > PARSER=your_llama_cloud_url_here  
-   > MONGO_URI=mongodb://admin:123456789@192.168.108.6:27017?authSource=admin
+   > MONGO_URI=your_mongo_uri_here
 
 ### Docker Setup
 ```bash
-# Create monitoring network
+# Create a monitoring network
 docker network create monitoring_network
 
 # Start MongoDB
@@ -121,7 +121,7 @@ docker compose -f docker-compose.weaviate.yml up -d
 # Start app 
 docker compose -f docker-compose.app.yml up -d
 
-# Start monitoring stack
+# Start monitoring the stack
 docker compose -f docker-compose.monitor.yml up -d
 ```
 
@@ -176,14 +176,14 @@ dvc repro
 ```bash
 clearml-init
 ```
-When setting up ClearML for the first time, you need to create new ClearML credentials through the settings page in your `clearml-server` web app (e.g., http://localhost:8080//settings/workspace-configuration) or create a free account at https://app.clear.ml/settings/workspace-configuration. Press "Create new credentials" then copy the configuration to clipboard and paste it. Wait until the credentials are verified then your ClearML setup is successful.
+When setting up ClearML for the first time, you need to create new ClearML credentials through the settings page in your `clearml-server` web app (e.g., http://localhost:8080//settings/workspace-configuration) or create a free account at https://app.clear.ml/settings/workspace-configuration. Press "Create new credentials," then copy the configuration to the clipboard and paste it. Wait until the credentials are verified, and then your ClearML setup is successful.
 
 ### Data Processing and Model Training
 ```bash
 # Extract text from PDFs and store in Weaviate
 python setup_vectordb.py
 
-# Train and evaluate the model
+# Train and evaluate the model:
 python train.py
 python test.py
 ```
